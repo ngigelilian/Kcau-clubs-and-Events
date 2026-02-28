@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import type { BreadcrumbItem, Event } from '@/types';
+import type { BreadcrumbItem, Event, EventType } from '@/types';
 import { type FormEvent } from 'react';
 
 interface Club { id: number; name: string; }
@@ -77,7 +77,7 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>Event Type *</Label>
-                                    <Select value={data.type} onValueChange={(v) => setData('type', v)}>
+                                    <Select value={data.type} onValueChange={(v) => setData('type', v as EventType)}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             {eventTypes.map((t) => (<SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>))}
@@ -142,7 +142,7 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label>Paid event</Label>
-                                <Switch checked={data.is_paid} onCheckedChange={(checked) => setData('is_paid', checked)} />
+                                <Switch checked={data.is_paid} onCheckedChange={(checked: boolean) => setData('is_paid', checked)} />
                             </div>
                             {data.is_paid && (
                                 <div className="space-y-2">

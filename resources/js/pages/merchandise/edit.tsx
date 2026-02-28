@@ -59,18 +59,18 @@ export default function MerchandiseEdit({ merchandise: item }: Props) {
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="price">Price (cents) *</Label>
-                                    <Input id="price" type="number" value={data.price} onChange={(e) => setData('price', e.target.value)} />
+                                    <Input id="price" type="number" value={data.price} onChange={(e) => setData('price', Number(e.target.value))} />
                                     {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="stock_quantity">Stock *</Label>
-                                    <Input id="stock_quantity" type="number" value={data.stock_quantity} onChange={(e) => setData('stock_quantity', e.target.value)} />
+                                    <Input id="stock_quantity" type="number" value={data.stock_quantity} onChange={(e) => setData('stock_quantity', Number(e.target.value))} />
                                     {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity}</p>}
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="images">Product Images (replace existing)</Label>
-                                {item.image_url && <img src={item.image_url} alt="Current" className="h-24 w-24 rounded-lg object-cover" />}
+                                {item.image_urls?.[0] && <img src={item.image_urls[0]} alt="Current" className="h-24 w-24 rounded-lg object-cover" />}
                                 <Input id="images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setData('images', Array.from(e.target.files || []))} />
                             </div>
                         </CardContent>

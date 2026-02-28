@@ -150,7 +150,7 @@ export default function EventCreate({ clubs, eventTypes }: Props) {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="is_paid">This is a paid event</Label>
-                                <Switch id="is_paid" checked={data.is_paid} onCheckedChange={(checked) => setData('is_paid', checked)} />
+                                <Switch id="is_paid" checked={data.is_paid} onCheckedChange={(checked: boolean) => setData('is_paid', checked)} />
                             </div>
                             {data.is_paid && (
                                 <div className="space-y-2">

@@ -16,7 +16,7 @@ export type PaymentMethod = 'mpesa';
 export type MerchandiseStatus = 'available' | 'out_of_stock' | 'discontinued';
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 export type TicketPriority = 'low' | 'medium' | 'high';
-export type AnnouncementAudience = 'all_members' | 'leaders_only' | 'specific_club';
+export type AnnouncementAudience = 'all_members' | 'all_students' | 'club_members' | 'leaders_only' | 'specific_club';
 export type ReportType = 'participation' | 'financial' | 'club_performance' | 'user_activity';
 export type ReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
@@ -138,6 +138,7 @@ export interface Merchandise {
     // Computed
     formatted_price?: string;
     is_in_stock?: boolean;
+    image_url?: string;
     image_urls?: string[];
 }
 
@@ -193,6 +194,7 @@ export interface Announcement {
     user_id: number;
     title: string;
     body: string;
+    content: string;
     audience: AnnouncementAudience;
     is_email: boolean;
     published_at: string | null;
@@ -202,6 +204,7 @@ export interface Announcement {
     // Relationships
     club?: Club;
     author?: import('./auth').User;
+    created_by_user?: import('./auth').User;
 }
 
 export interface Ticket {
@@ -209,6 +212,7 @@ export interface Ticket {
     user_id: number;
     subject: string;
     description: string;
+    message: string;
     status: TicketStatus;
     priority: TicketPriority;
     assigned_to: number | null;
@@ -220,10 +224,12 @@ export interface Ticket {
     // Relationships
     user?: import('./auth').User;
     assignee?: import('./auth').User;
+    assigned_to_user?: import('./auth').User;
     replies?: TicketReply[];
 
     // Computed
     is_overdue?: boolean;
+    replies_count?: number;
 }
 
 export interface TicketReply {
@@ -231,6 +237,7 @@ export interface TicketReply {
     ticket_id: number;
     user_id: number;
     message: string;
+    is_admin_reply: boolean;
     created_at: string;
     updated_at: string;
 

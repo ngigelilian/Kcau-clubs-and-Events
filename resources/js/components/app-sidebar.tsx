@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, Shield, type LucideIcon } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, Shield, CalendarDays, ShoppingBag, Bell, LifeBuoy, UserCog, type LucideIcon } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -15,7 +15,6 @@ import {
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 import { dashboard } from '@/routes';
-import { index as clubsIndex } from '@/routes/clubs';
 
 const mainNavItems: NavItem[] = [
     {
@@ -25,8 +24,28 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Clubs',
-        href: clubsIndex(),
+        href: { url: '/clubs', method: 'get' },
         icon: Users,
+    },
+    {
+        title: 'Events',
+        href: { url: '/events', method: 'get' },
+        icon: CalendarDays,
+    },
+    {
+        title: 'Merchandise',
+        href: { url: '/merchandise', method: 'get' },
+        icon: ShoppingBag,
+    },
+    {
+        title: 'Announcements',
+        href: { url: '/announcements', method: 'get' },
+        icon: Bell,
+    },
+    {
+        title: 'Support',
+        href: { url: '/tickets', method: 'get' },
+        icon: LifeBuoy,
     },
 ];
 
@@ -35,6 +54,16 @@ const adminNavItems: NavItem[] = [
         title: 'Manage Clubs',
         href: { url: '/admin/clubs', method: 'get' },
         icon: Shield,
+    },
+    {
+        title: 'Manage Events',
+        href: { url: '/admin/events', method: 'get' },
+        icon: CalendarDays,
+    },
+    {
+        title: 'Manage Users',
+        href: { url: '/admin/users', method: 'get' },
+        icon: UserCog,
     },
 ];
 
