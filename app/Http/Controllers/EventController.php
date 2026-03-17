@@ -9,9 +9,11 @@ use App\Enums\MembershipStatus;
 use App\Enums\RegistrationStatus;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
+use App\Http\Requests\Payment\InitiateEventRegistrationRequest;
 use App\Models\Club;
 use App\Models\Event;
 use App\Services\EventService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +22,7 @@ class EventController extends Controller
 {
     public function __construct(
         private readonly EventService $eventService,
+        private readonly PaymentService $paymentService,
     ) {}
 
     public function index(Request $request): Response
@@ -65,7 +68,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function show(Event $event): Response
+    public function show(Request $request, Event $event): Response
     {
         $this->authorize('view', $event);
 
@@ -83,7 +86,7 @@ class EventController extends Controller
         $event->is_registration_open = $event->isRegistrationOpen();
 
         $userRegistration = null;
-        if ($user = auth()->user()) {
+        if ($user = $request->user()) {
             $userRegistration = $event->registrations()
                 ->where('user_id', $user->id)
                 ->where('status', '!=', RegistrationStatus::Cancelled)
@@ -116,6 +119,7 @@ class EventController extends Controller
 
         return Inertia::render('events/create', [
             'clubs' => $clubs,
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin']),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,
                 'label' => $t->label(),
@@ -125,20 +129,27 @@ class EventController extends Controller
 
     public function store(StoreEventRequest $request)
     {
+        $data = $request->validated();
+
         $event = $this->eventService->createEvent(
-            $request->validated(),
+            $data,
             $request->user(),
         );
 
+        $wasSubmitted = (bool) ($data['submit_for_approval'] ?? false);
+
         return to_route('events.show', $event)
-            ->with('success', 'Event created! It will be reviewed by an admin before publishing.');
+            ->with('success', $wasSubmitted
+                ? 'Event submitted for approval. An admin will review it before publishing.'
+                : 'Draft saved successfully. You can submit it for approval when ready.');
     }
 
-    public function edit(Event $event): Response
+    public function edit(Request $request, Event $event): Response
     {
         $this->authorize('update', $event);
 
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         $clubs = [];
 
         if ($user->hasRole(['admin', 'super-admin'])) {
@@ -157,6 +168,7 @@ class EventController extends Controller
         return Inertia::render('events/edit', [
             'event' => $event,
             'clubs' => $clubs,
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin']),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,
                 'label' => $t->label(),
@@ -166,19 +178,35 @@ class EventController extends Controller
 
     public function update(UpdateEventRequest $request, Event $event)
     {
-        $this->eventService->updateEvent($event, $request->validated());
+        $data = $request->validated();
+        $this->eventService->updateEvent($event, $data, $request->user());
+
+        $wasSubmitted = (bool) ($data['submit_for_approval'] ?? false);
 
         return to_route('events.show', $event)
-            ->with('success', 'Event updated successfully.');
+            ->with('success', $wasSubmitted
+                ? 'Event submitted for approval.'
+                : 'Draft updated successfully.');
     }
 
-    public function register(Event $event)
+    public function register(InitiateEventRegistrationRequest $request, Event $event)
     {
         $this->authorize('register', $event);
 
         try {
-            $this->eventService->registerUser($event, auth()->user());
-            return back()->with('success', 'You have been registered for this event!');
+            if (! $event->is_paid) {
+                $this->eventService->registerUser($event, $request->user());
+
+                return back()->with('success', 'You have been registered for this event!');
+            }
+
+            $payment = $this->paymentService->initiateEventRegistration(
+                $event,
+                $request->user(),
+                $request->validated('phone_number'),
+            );
+
+            return back()->with('success', 'M-Pesa prompt sent. Complete payment on your phone to confirm your registration.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -187,7 +215,12 @@ class EventController extends Controller
     public function cancelRegistration(Event $event)
     {
         try {
-            $this->eventService->cancelRegistration($event, auth()->user());
+            $user = request()->user();
+            if (! $user) {
+                throw new \RuntimeException('You must be logged in to cancel registration.');
+            }
+
+            $this->eventService->cancelRegistration($event, $user);
             return back()->with('success', 'Your registration has been cancelled.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());

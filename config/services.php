@@ -48,6 +48,7 @@ return [
         'shortcode' => env('MPESA_SHORTCODE'),
         'passkey' => env('MPESA_PASSKEY'),
         'callback_url' => env('MPESA_CALLBACK_URL'),
+        'callback_token' => env('MPESA_CALLBACK_TOKEN'),
     ],
 
 ];

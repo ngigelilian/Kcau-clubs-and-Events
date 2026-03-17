@@ -507,7 +507,7 @@ CACHE_STORE=database
 - **Data integrity:** Use transactions, foreign key constraints, unique constraints, and soft deletes to protect data
 - **Scalability:** Write code that handles 5,000+ concurrent users without architectural changes
 - **Maintainability:** Prefer explicit, readable code over clever shortcuts — future developers should understand intent immediately
-- **KCAU Brand:** Every page should feel like an official KCA University product — consistent colors, typography, and tone
+- **KCAU Brand:** Every page should feel like an official KCA University product — consistent colors, typography, and tone 
 - **Incremental delivery:** Each module should be functional and testable independently — avoid cross-module dependencies during development
 - **Type safety:** Leverage TypeScript on the frontend and PHP enums/strict types on the backend to catch errors at compile time
 

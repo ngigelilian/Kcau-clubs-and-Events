@@ -15,6 +15,7 @@ interface EventType { value: string; label: string; }
 interface Props {
     clubs: Club[];
     eventTypes: EventType[];
+    canCreateSchoolEvents: boolean;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -22,8 +23,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create Event', href: '/events/create' },
 ];
 
-export default function EventCreate({ clubs, eventTypes }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
+export default function EventCreate({ clubs, eventTypes, canCreateSchoolEvents }: Props) {
+    const { data, setData, post, transform, processing, errors } = useForm({
         title: '',
         description: '',
         club_id: '' as string | number,
@@ -36,11 +37,30 @@ export default function EventCreate({ clubs, eventTypes }: Props) {
         is_paid: false,
         fee_amount: '' as string | number,
         cover: null as File | null,
+        submit_for_approval: false,
     });
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent, submitForApproval = false) => {
         e.preventDefault();
+        setData('submit_for_approval', submitForApproval);
         post('/events', { forceFormData: true });
+    };
+
+    const saveDraft = () => {
+        transform((current) => ({ ...current, submit_for_approval: false }));
+        post('/events', { forceFormData: true });
+    };
+
+    const submitForApproval = () => {
+        transform((current) => ({ ...current, submit_for_approval: true }));
+        post('/events', { forceFormData: true });
+    };
+
+    const handleTypeChange = (value: string) => {
+        setData('type', value);
+        if (value === 'school') {
+            setData('club_id', '');
+        }
     };
 
     return (
@@ -74,10 +94,12 @@ export default function EventCreate({ clubs, eventTypes }: Props) {
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="type">Event Type *</Label>
-                                    <Select value={data.type} onValueChange={(v) => setData('type', v)}>
+                                    <Select value={data.type} onValueChange={handleTypeChange}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            {eventTypes.map((t) => (<SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>))}
+                                            {eventTypes
+                                                .filter((t) => canCreateSchoolEvents || t.value !== 'school')
+                                                .map((t) => (<SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>))}
                                         </SelectContent>
                                     </Select>
                                     {errors.type && <p className="text-sm text-destructive">{errors.type}</p>}
@@ -164,7 +186,12 @@ export default function EventCreate({ clubs, eventTypes }: Props) {
 
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
-                        <Button type="submit" disabled={processing}>{processing ? 'Creating...' : 'Create Event'}</Button>
+                        <Button type="button" variant="secondary" disabled={processing} onClick={saveDraft}>
+                            {processing ? 'Saving...' : 'Save as Draft'}
+                        </Button>
+                        <Button type="button" disabled={processing} onClick={submitForApproval}>
+                            {processing ? 'Submitting...' : 'Submit for Approval'}
+                        </Button>
                     </div>
                 </form>
             </div>

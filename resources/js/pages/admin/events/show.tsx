@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -11,6 +12,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import type { BreadcrumbItem, Event } from '@/types';
 import { CalendarDays, MapPin, Users, CheckCircle, XCircle, Ban, Flag } from 'lucide-react';
+import { useState } from 'react';
+import type { FormDataConvertible } from '@inertiajs/core';
 
 interface Props {
     event: Event;
@@ -29,14 +32,16 @@ function statusColor(status: string) {
 }
 
 export default function AdminEventShow({ event }: Props) {
+    const [cancelReason, setCancelReason] = useState('');
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: '/admin/events' },
         { title: 'Manage Events', href: '/admin/events' },
         { title: event.title, href: `/admin/events/${event.slug}` },
     ];
 
-    const handleAction = (action: string) => {
-        router.post(`/admin/events/${event.slug}/${action}`);
+    const handleAction = (action: string, payload: Record<string, FormDataConvertible> = {}) => {
+        router.post(`/admin/events/${event.slug}/${action}`, payload);
     };
 
     return (
@@ -100,11 +105,26 @@ export default function AdminEventShow({ event }: Props) {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Cancel this event?</AlertDialogTitle>
-                                            <AlertDialogDescription>All registrations will be cancelled.</AlertDialogDescription>
+                                            <AlertDialogDescription>
+                                                All registrations will be cancelled. Please provide a reason for this action.
+                                            </AlertDialogDescription>
                                         </AlertDialogHeader>
+                                        <Textarea
+                                            value={cancelReason}
+                                            onChange={(e) => setCancelReason(e.target.value)}
+                                            placeholder="Reason for cancellation"
+                                            rows={4}
+                                        />
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleAction('cancel')} className="bg-destructive text-destructive-foreground">Cancel Event</AlertDialogAction>
+                                            <Button
+                                                type="button"
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                disabled={!cancelReason.trim()}
+                                                onClick={() => handleAction('cancel', { reason: cancelReason.trim() })}
+                                            >
+                                                Cancel Event
+                                            </Button>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>

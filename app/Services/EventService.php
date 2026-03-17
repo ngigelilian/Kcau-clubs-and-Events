@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Enums\EventStatus;
+use App\Enums\EventType;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\RegistrationStatus;
+use App\Models\Club;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -16,6 +19,10 @@ class EventService
     public function createEvent(array $data, User $creator): Event
     {
         return DB::transaction(function () use ($data, $creator) {
+            $this->assertOwnershipRules($data, $creator);
+
+            $status = $this->resolveCreateStatus($data);
+
             $event = Event::create([
                 'title' => $data['title'],
                 'slug' => Str::slug($data['title']),
@@ -29,7 +36,7 @@ class EventService
                 'registration_deadline' => $data['registration_deadline'] ?? null,
                 'is_paid' => $data['is_paid'] ?? false,
                 'fee_amount' => $data['is_paid'] ? ($data['fee_amount'] ?? 0) : 0,
-                'status' => EventStatus::Pending,
+                'status' => $status,
                 'created_by' => $creator->id,
             ]);
 
@@ -40,16 +47,16 @@ class EventService
             activity()
                 ->performedOn($event)
                 ->causedBy($creator)
-                ->log('Event created');
+                ->log($status === EventStatus::Pending ? 'Event submitted for approval' : 'Event saved as draft');
 
             return $event;
         });
     }
 
-    public function updateEvent(Event $event, array $data): Event
+    public function updateEvent(Event $event, array $data, User $actor): Event
     {
-        return DB::transaction(function () use ($event, $data) {
-            $event->update([
+        return DB::transaction(function () use ($event, $data, $actor) {
+            $normalized = [
                 'title' => $data['title'],
                 'slug' => Str::slug($data['title']),
                 'description' => $data['description'],
@@ -62,14 +69,80 @@ class EventService
                 'registration_deadline' => $data['registration_deadline'] ?? null,
                 'is_paid' => $data['is_paid'] ?? false,
                 'fee_amount' => ($data['is_paid'] ?? false) ? ($data['fee_amount'] ?? 0) : 0,
-            ]);
+            ];
+
+            $this->assertOwnershipRules($normalized, $actor);
+
+            $nextStatus = $this->resolveUpdateStatus($event, $data);
+            $normalized['status'] = $nextStatus;
+
+            if ($nextStatus === EventStatus::Pending) {
+                $normalized['approved_by'] = null;
+                $normalized['approved_at'] = null;
+            }
+
+            $event->update($normalized);
 
             if (isset($data['cover'])) {
                 $event->addMedia($data['cover'])->toMediaCollection('cover');
             }
 
+            activity()
+                ->performedOn($event)
+                ->causedBy($actor)
+                ->log($nextStatus === EventStatus::Pending ? 'Event submitted for approval' : 'Event draft updated');
+
             return $event->fresh();
         });
+    }
+
+    private function assertOwnershipRules(array $data, User $actor): void
+    {
+        $type = $data['type'] instanceof EventType ? $data['type'] : EventType::from((string) $data['type']);
+
+        if ($type === EventType::School) {
+            if (! $actor->hasRole(['admin', 'super-admin'])) {
+                throw new AuthorizationException('Only Admin or Super Admin can create school-wide events.');
+            }
+
+            return;
+        }
+
+        $clubId = $data['club_id'] ?? null;
+        if (! $clubId) {
+            throw new \InvalidArgumentException('A club event must specify a club.');
+        }
+
+        if ($actor->hasRole(['admin', 'super-admin'])) {
+            return;
+        }
+
+        $club = Club::find($clubId);
+        if (! $club || ! $actor->isLeaderOf($club)) {
+            throw new AuthorizationException('You can only create club events for clubs you lead.');
+        }
+    }
+
+    private function resolveCreateStatus(array $data): EventStatus
+    {
+        return (bool) ($data['submit_for_approval'] ?? false)
+            ? EventStatus::Pending
+            : EventStatus::Draft;
+    }
+
+    private function resolveUpdateStatus(Event $event, array $data): EventStatus
+    {
+        $submit = (bool) ($data['submit_for_approval'] ?? false);
+
+        if ($submit && in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)) {
+            return EventStatus::Pending;
+        }
+
+        if (! $submit && in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)) {
+            return EventStatus::Draft;
+        }
+
+        return $event->status;
     }
 
     public function approveEvent(Event $event, User $approver): Event

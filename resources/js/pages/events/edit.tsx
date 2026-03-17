@@ -7,18 +7,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import type { BreadcrumbItem, Event, EventType } from '@/types';
+import type { BreadcrumbItem, Event, EventType as EventTypeValue } from '@/types';
 import { type FormEvent } from 'react';
 
 interface Club { id: number; name: string; }
-interface EventType { value: string; label: string; }
+interface EventTypeOption { value: string; label: string; }
 interface Props {
     event: Event;
     clubs: Club[];
-    eventTypes: EventType[];
+    eventTypes: EventTypeOption[];
+    canCreateSchoolEvents: boolean;
 }
 
-export default function EventEdit({ event, clubs, eventTypes }: Props) {
+export default function EventEdit({ event, clubs, eventTypes, canCreateSchoolEvents }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Events', href: '/events' },
         { title: event.title, href: `/events/${event.slug}` },
@@ -30,7 +31,7 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
         return new Date(date).toISOString().slice(0, 16);
     };
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, transform, processing, errors } = useForm({
         _method: 'PUT' as const,
         title: event.title,
         description: event.description,
@@ -44,11 +45,30 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
         is_paid: event.is_paid,
         fee_amount: event.fee_amount || ('' as string | number),
         cover: null as File | null,
+        submit_for_approval: false,
     });
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent, submitForApproval = false) => {
         e.preventDefault();
+        setData('submit_for_approval', submitForApproval);
         post(`/events/${event.slug}`, { forceFormData: true });
+    };
+
+    const saveDraft = () => {
+        transform((current) => ({ ...current, submit_for_approval: false }));
+        post(`/events/${event.slug}`, { forceFormData: true });
+    };
+
+    const submitForApproval = () => {
+        transform((current) => ({ ...current, submit_for_approval: true }));
+        post(`/events/${event.slug}`, { forceFormData: true });
+    };
+
+    const handleTypeChange = (value: string) => {
+        setData('type', value as EventTypeValue);
+        if (value === 'school') {
+            setData('club_id', '');
+        }
     };
 
     return (
@@ -77,10 +97,12 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>Event Type *</Label>
-                                    <Select value={data.type} onValueChange={(v) => setData('type', v as EventType)}>
+                                    <Select value={data.type} onValueChange={handleTypeChange}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            {eventTypes.map((t) => (<SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>))}
+                                            {eventTypes
+                                                .filter((t) => canCreateSchoolEvents || t.value !== 'school')
+                                                .map((t) => (<SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -156,7 +178,12 @@ export default function EventEdit({ event, clubs, eventTypes }: Props) {
 
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
-                        <Button type="submit" disabled={processing}>{processing ? 'Saving...' : 'Save Changes'}</Button>
+                        <Button type="button" variant="secondary" disabled={processing} onClick={saveDraft}>
+                            {processing ? 'Saving...' : 'Save as Draft'}
+                        </Button>
+                        <Button type="button" disabled={processing} onClick={submitForApproval}>
+                            {processing ? 'Submitting...' : 'Submit for Approval'}
+                        </Button>
                     </div>
                 </form>
             </div>

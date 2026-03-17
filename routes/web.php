@@ -9,6 +9,7 @@ use App\Http\Controllers\ClubController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MerchandiseController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -48,6 +49,8 @@ Route::get('merchandise/{merchandise}', [MerchandiseController::class, 'show'])-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('orders', [PaymentController::class, 'orders'])->name('orders.index');
+    Route::get('payments', [PaymentController::class, 'payments'])->name('payments.index');
 
     // -----------------------------------------------------------------
     // Club Routes (authenticated)

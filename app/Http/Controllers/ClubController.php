@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ClubCategory;
 use App\Enums\ClubStatus;
 use App\Enums\MembershipStatus;
+use App\Enums\MerchandiseStatus;
 use App\Http\Requests\Club\StoreClubRequest;
 use App\Http\Requests\Club\UpdateClubRequest;
 use App\Models\Club;
@@ -82,6 +83,7 @@ class ClubController extends Controller
             'creator:id,name,avatar',
             'memberships' => fn ($q) => $q->where('status', MembershipStatus::Active)->with('user:id,name,avatar,student_id'),
             'events' => fn ($q) => $q->where('status', 'approved')->where('start_datetime', '>=', now())->orderBy('start_datetime')->limit(5),
+            'merchandise' => fn ($q) => $q->where('status', MerchandiseStatus::Available)->orderBy('name')->limit(8),
         ]);
 
         $club->loadCount(['memberships as active_members_count' => function ($q) {
@@ -90,6 +92,11 @@ class ClubController extends Controller
 
         $club->logo_url = $club->getFirstMediaUrl('logo');
         $club->banner_url = $club->getFirstMediaUrl('banner');
+        $club->merchandise->each(function ($item) {
+            $item->image_urls = $item->getMedia('images')->map->getUrl()->toArray();
+            $item->formatted_price = $item->formattedPrice();
+            $item->is_in_stock = $item->isInStock();
+        });
 
         // Current user's membership status
         $userMembership = null;

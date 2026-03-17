@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MerchandiseStatus;
+use App\Http\Requests\Payment\InitiateMerchandisePurchaseRequest;
 use App\Models\Club;
 use App\Models\Merchandise;
 use App\Services\MerchandiseService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +16,7 @@ class MerchandiseController extends Controller
 {
     public function __construct(
         private readonly MerchandiseService $merchandiseService,
+        private readonly PaymentService $paymentService,
     ) {}
 
     public function index(Request $request): Response
@@ -69,6 +72,7 @@ class MerchandiseController extends Controller
 
         $merchandise->load('club:id,name,slug');
         $merchandise->image_urls = $merchandise->getMedia('images')->map->getUrl()->toArray();
+        $merchandise->image_url = $merchandise->image_urls[0] ?? null;
         $merchandise->formatted_price = $merchandise->formattedPrice();
         $merchandise->is_in_stock = $merchandise->isInStock();
 
@@ -81,13 +85,14 @@ class MerchandiseController extends Controller
 
         $related->transform(function (Merchandise $item) {
             $item->image_urls = $item->getMedia('images')->map->getUrl()->toArray();
+            $item->image_url = $item->image_urls[0] ?? null;
             $item->formatted_price = $item->formattedPrice();
             return $item;
         });
 
         return Inertia::render('merchandise/show', [
             'merchandise' => $merchandise,
-            'related' => $related,
+            'relatedItems' => $related,
         ]);
     }
 
@@ -161,17 +166,19 @@ class MerchandiseController extends Controller
             ->with('success', 'Merchandise item deleted.');
     }
 
-    public function order(Request $request, Merchandise $merchandise)
+    public function order(InitiateMerchandisePurchaseRequest $request, Merchandise $merchandise)
     {
         $this->authorize('purchase', $merchandise);
 
-        $validated = $request->validate([
-            'quantity' => ['required', 'integer', 'min:1', 'max:10'],
-        ]);
-
         try {
-            $this->merchandiseService->placeOrder($merchandise, auth()->user(), $validated['quantity']);
-            return back()->with('success', 'Order placed successfully! Proceed to payment.');
+            $this->paymentService->initiateMerchandisePurchase(
+                $merchandise,
+                $request->user(),
+                $request->validated('quantity'),
+                $request->validated('phone_number'),
+            );
+
+            return back()->with('success', 'M-Pesa prompt sent. Complete payment on your phone to confirm this order.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }

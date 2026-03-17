@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\EventStatus;
+use App\Models\Club;
 use App\Models\Event;
 use App\Models\User;
 
@@ -43,6 +44,23 @@ class EventPolicy
     }
 
     /**
+     * Determine whether the user can create a school-wide event.
+     */
+    public function createSchool(User $user): bool
+    {
+        return $user->hasRole(['admin', 'super-admin']);
+    }
+
+    /**
+     * Determine whether the user can create a club event for a specific club.
+     */
+    public function createClub(User $user, Club $club): bool
+    {
+        return $user->hasRole(['admin', 'super-admin'])
+            || $user->isLeaderOf($club);
+    }
+
+    /**
      * Determine whether the user can update the event.
      */
     public function update(User $user, Event $event): bool
@@ -54,7 +72,7 @@ class EventPolicy
         }
 
         return $event->created_by === $user->id
-            || ($event->club_id && $user->isLeaderOf($event->club))
+            || ($event->club && $user->isLeaderOf($event->club))
             || $user->hasRole(['admin', 'super-admin']);
     }
 

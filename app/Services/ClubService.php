@@ -1,4 +1,4 @@
-http://localhost:8000<?php
+<?php
 
 namespace App\Services;
 

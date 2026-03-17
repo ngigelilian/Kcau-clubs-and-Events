@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { BreadcrumbItem, Club, Event, Order, Announcement, Ticket } from '@/types';
+import type { BreadcrumbItem, Club, Event, Order, Announcement, Payment } from '@/types';
 import {
     Users, CalendarDays, ShoppingBag, Bell, LifeBuoy, ArrowRight,
     Clock, DollarSign, Shield
@@ -16,8 +16,9 @@ interface StudentProps {
     myUpcomingEvents: Event[];
     upcomingEvents: Event[];
     myOrders: Order[];
+    recentPayments: Payment[];
     announcements: Announcement[];
-    openTickets: Ticket[];
+    openTickets: number;
 }
 interface AdminStats { totalUsers: number; totalClubs: number; totalEvents: number; totalRevenue: number; pendingClubs: number; pendingEvents: number; }
 interface AdminProps {
@@ -79,7 +80,7 @@ function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recen
     );
 }
 
-function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders, announcements, openTickets }: StudentProps) {
+function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders, recentPayments, announcements, openTickets }: StudentProps) {
     return (
         <div className="space-y-6">
             <div><h1 className="text-2xl font-bold tracking-tight">Dashboard</h1><p className="text-muted-foreground">Welcome back! Here's what's happening.</p></div>
@@ -87,7 +88,7 @@ function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders,
                 <Card><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900"><Shield className="h-5 w-5 text-purple-600 dark:text-purple-300" /></div><div><p className="text-2xl font-bold">{myClubs.length}</p><p className="text-xs text-muted-foreground">My Clubs</p></div></CardContent></Card>
                 <Card><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-green-100 p-2 dark:bg-green-900"><CalendarDays className="h-5 w-5 text-green-600 dark:text-green-300" /></div><div><p className="text-2xl font-bold">{myUpcomingEvents.length}</p><p className="text-xs text-muted-foreground">Upcoming</p></div></CardContent></Card>
                 <Card><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900"><ShoppingBag className="h-5 w-5 text-blue-600 dark:text-blue-300" /></div><div><p className="text-2xl font-bold">{myOrders.length}</p><p className="text-xs text-muted-foreground">Orders</p></div></CardContent></Card>
-                <Card><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-orange-100 p-2 dark:bg-orange-900"><LifeBuoy className="h-5 w-5 text-orange-600 dark:text-orange-300" /></div><div><p className="text-2xl font-bold">{openTickets.length}</p><p className="text-xs text-muted-foreground">Open Tickets</p></div></CardContent></Card>
+                <Card><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-orange-100 p-2 dark:bg-orange-900"><LifeBuoy className="h-5 w-5 text-orange-600 dark:text-orange-300" /></div><div><p className="text-2xl font-bold">{openTickets}</p><p className="text-xs text-muted-foreground">Open Tickets</p></div></CardContent></Card>
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <Card>
@@ -97,6 +98,14 @@ function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders,
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base">My Upcoming Events</CardTitle><Link href="/events"><Button variant="ghost" size="sm">View all <ArrowRight className="ml-1 h-4 w-4" /></Button></Link></CardHeader>
                     <CardContent>{myUpcomingEvents.length > 0 ? <div className="space-y-3">{myUpcomingEvents.slice(0, 5).map((e) => (<Link key={e.id} href={`/events/${e.slug}`} className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50"><div className="rounded-lg bg-green-100 p-2 dark:bg-green-900"><CalendarDays className="h-5 w-5 text-green-600 dark:text-green-300" /></div><div className="flex-1 min-w-0"><p className="font-medium truncate">{e.title}</p><p className="text-xs text-muted-foreground">{formatDate(e.start_datetime)} at {formatTime(e.start_datetime)}</p></div></Link>))}</div> : <div className="text-center py-6"><p className="text-sm text-muted-foreground mb-2">No upcoming events</p><Link href="/events"><Button variant="outline" size="sm">Browse Events</Button></Link></div>}</CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base">Recent Orders</CardTitle><Link href="/orders"><Button variant="ghost" size="sm">Full history <ArrowRight className="ml-1 h-4 w-4" /></Button></Link></CardHeader>
+                    <CardContent>{myOrders.length > 0 ? <div className="space-y-3">{myOrders.map((order) => (<div key={order.id} className="flex items-center justify-between rounded-lg border p-3"><div><p className="font-medium">Order #{order.id}</p><p className="text-xs text-muted-foreground">{order.status}</p></div><div className="text-right"><p className="font-medium">{order.formatted_total}</p><p className="text-xs text-muted-foreground">{(order as Order & { latest_payment?: Payment }).latest_payment?.status ?? 'No payment'}</p></div></div>))}</div> : <p className="text-sm text-muted-foreground py-4 text-center">No orders yet</p>}</CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base">Recent Payments</CardTitle><Link href="/payments"><Button variant="ghost" size="sm">Full history <ArrowRight className="ml-1 h-4 w-4" /></Button></Link></CardHeader>
+                    <CardContent>{recentPayments.length > 0 ? <div className="space-y-3">{recentPayments.map((payment) => (<div key={payment.id} className="flex items-center justify-between rounded-lg border p-3"><div><p className="font-medium">Payment #{payment.id}</p><p className="text-xs text-muted-foreground">{payment.phone_number}</p></div><div className="text-right"><p className="font-medium">{payment.formatted_amount}</p><Badge variant="outline" className="text-xs">{payment.status}</Badge></div></div>))}</div> : <p className="text-sm text-muted-foreground py-4 text-center">No payments yet</p>}</CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base">Latest Announcements</CardTitle><Link href="/announcements"><Button variant="ghost" size="sm">View all <ArrowRight className="ml-1 h-4 w-4" /></Button></Link></CardHeader>

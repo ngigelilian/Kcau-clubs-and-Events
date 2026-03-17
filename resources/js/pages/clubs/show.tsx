@@ -202,6 +202,46 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                 </CardContent>
                             </Card>
                         )}
+
+                        {club.merchandise && club.merchandise.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Package className="h-5 w-5" />
+                                        Club Merchandise
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        {club.merchandise.map((item) => (
+                                            <Link
+                                                key={item.id}
+                                                href={`/merchandise/${item.id}`}
+                                                className="overflow-hidden rounded-lg border transition hover:border-primary/40 hover:bg-muted/30"
+                                            >
+                                                {item.image_urls?.[0] ? (
+                                                    <img src={item.image_urls[0]} alt={item.name} className="h-28 w-full object-cover" />
+                                                ) : (
+                                                    <div className="flex h-28 items-center justify-center bg-muted text-muted-foreground">
+                                                        No image
+                                                    </div>
+                                                )}
+                                                <div className="space-y-1 p-3">
+                                                    <p className="font-medium">{item.name}</p>
+                                                    <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
+                                                    <div className="flex items-center justify-between text-sm">
+                                                        <span className="font-semibold">{item.formatted_price ?? `KES ${(item.price / 100).toFixed(2)}`}</span>
+                                                        <Badge variant={item.is_in_stock ? 'outline' : 'destructive'}>
+                                                            {item.is_in_stock ? 'In stock' : 'Out of stock'}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
 
                     {/* Sidebar */}

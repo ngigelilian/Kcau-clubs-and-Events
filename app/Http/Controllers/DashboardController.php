@@ -72,10 +72,29 @@ class DashboardController extends Controller
 
         // My orders
         $myOrders = Order::where('user_id', $user->id)
-            ->with('orderable')
+            ->with(['orderable', 'payments' => fn ($query) => $query->latest()])
             ->latest()
             ->limit(5)
             ->get();
+
+        $myOrders->transform(function (Order $order) {
+            $order->formatted_total = $order->formattedTotal();
+            $order->latest_payment = $order->payments->first();
+
+            return $order;
+        });
+
+        $recentPayments = Payment::where('user_id', $user->id)
+            ->with('order.orderable')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $recentPayments->transform(function (Payment $payment) {
+            $payment->formatted_amount = $payment->formattedAmount();
+
+            return $payment;
+        });
 
         // Recent announcements
         $clubIds = $user->clubMemberships()->where('status', 'active')->pluck('club_id');
@@ -86,7 +105,7 @@ class DashboardController extends Controller
             ->get(['id', 'title', 'club_id', 'published_at']);
 
         // My open tickets
-        $openTickets = Ticket::where('user_id', $user->id)
+        $openTicketsCount = Ticket::where('user_id', $user->id)
             ->whereIn('status', [TicketStatus::Open, TicketStatus::InProgress])
             ->count();
 
@@ -96,12 +115,13 @@ class DashboardController extends Controller
                 'clubsJoined' => $myClubs->count(),
                 'eventsRegistered' => $user->eventRegistrations()->where('status', RegistrationStatus::Registered)->count(),
                 'eventsAttended' => $user->eventRegistrations()->where('status', RegistrationStatus::Attended)->count(),
-                'openTickets' => $openTickets,
+                'openTickets' => $openTicketsCount,
             ],
             'myClubs' => $myClubs,
             'myUpcomingEvents' => $myUpcomingEvents,
             'upcomingEvents' => $upcomingEvents,
             'myOrders' => $myOrders,
+            'recentPayments' => $recentPayments,
             'announcements' => $announcements,
         ]);
     }
@@ -110,9 +130,9 @@ class DashboardController extends Controller
     {
         $stats = [
             'totalUsers' => User::count(),
-            'activeClubs' => Club::where('status', ClubStatus::Active)->count(),
+            'totalClubs' => Club::where('status', ClubStatus::Active)->count(),
             'pendingClubs' => Club::where('status', ClubStatus::Pending)->count(),
-            'upcomingEvents' => Event::where('status', EventStatus::Approved)->where('start_datetime', '>', now())->count(),
+            'totalEvents' => Event::where('status', EventStatus::Approved)->where('start_datetime', '>', now())->count(),
             'pendingEvents' => Event::where('status', EventStatus::Pending)->count(),
             'totalOrders' => Order::count(),
             'totalRevenue' => Payment::completed()->sum('amount'),
