@@ -5,8 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { BreadcrumbItem, Event, EventRegistration } from '@/types';
 import { CalendarDays, MapPin, Users, Clock, DollarSign, Edit, UserPlus, UserMinus, CheckCircle } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 interface Props {
     event: Event;
@@ -36,13 +40,34 @@ export default function EventShow({ event, userRegistration }: Props) {
     const { auth } = usePage().props as { auth: { user: { id: number; permissions: string[]; roles: string[] } | null } };
     const user = auth.user;
     const isAdmin = user?.roles?.includes('admin') || user?.roles?.includes('super-admin');
+    const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState((user as { phone?: string | null } | null)?.phone ?? '');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Events', href: '/events' },
         { title: event.title, href: `/events/${event.slug}` },
     ];
 
-    const handleRegister = () => router.post(`/events/${event.slug}/register`);
+    const handleRegister = () => {
+        if (event.is_paid) {
+            setPhoneDialogOpen(true);
+            return;
+        }
+
+        router.post(`/events/${event.slug}/register`);
+    };
+
+    const handlePaidRegistration = (e: FormEvent) => {
+        e.preventDefault();
+
+        router.post(
+            `/events/${event.slug}/register`,
+            { phone_number: phoneNumber || undefined },
+            {
+                onSuccess: () => setPhoneDialogOpen(false),
+            },
+        );
+    };
     const handleCancelRegistration = () => {
         if (confirm('Cancel your registration for this event?')) {
             router.delete(`/events/${event.slug}/register`);
@@ -172,7 +197,7 @@ export default function EventShow({ event, userRegistration }: Props) {
                                 <CardContent className="space-y-3 p-5">
                                     {!userRegistration && event.is_registration_open && (
                                         <Button onClick={handleRegister} className="w-full" size="lg">
-                                            <UserPlus className="mr-2 h-4 w-4" />Register
+                                            <UserPlus className="mr-2 h-4 w-4" />{event.is_paid ? 'Pay & Register' : 'Register'}
                                         </Button>
                                     )}
                                     {userRegistration && userRegistration.status === 'registered' && (
@@ -226,6 +251,36 @@ export default function EventShow({ event, userRegistration }: Props) {
                                 </CardContent>
                             </Card>
                         )}
+
+                        <Dialog open={phoneDialogOpen} onOpenChange={setPhoneDialogOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Enter M-Pesa Phone Number</DialogTitle>
+                                    <DialogDescription>
+                                        Use a Safaricom number to receive the STK push for this event payment.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <form onSubmit={handlePaidRegistration} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="event-phone-number">Phone Number</Label>
+                                        <Input
+                                            id="event-phone-number"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="2547XXXXXXXX or 07XXXXXXXX"
+                                        />
+                                    </div>
+
+                                    <DialogFooter>
+                                        <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)}>
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit">Send STK Push</Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
             </div>

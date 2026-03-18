@@ -14,8 +14,12 @@ use App\Models\Merchandise;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Notifications\AdminPaymentCompletedNotification;
+use App\Notifications\PaymentCompletedNotification;
+use App\Notifications\PaymentFailedNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
 class PaymentService
@@ -165,24 +169,24 @@ class PaymentService
     {
         $callback = $this->mpesaService->parseCallback($payload);
 
-        return DB::transaction(function () use ($callback): ?Payment {
-            $payment = Payment::query()
+        $payment = DB::transaction(function () use ($callback): ?Payment {
+            $paymentModel = Payment::query()
                 ->where('mpesa_checkout_request_id', $callback['checkout_request_id'])
                 ->lockForUpdate()
                 ->first();
 
-            if (! $payment) {
+            if (! $paymentModel) {
                 return null;
             }
 
-            if (in_array($payment->status, [PaymentStatus::Completed, PaymentStatus::Failed], true)) {
-                return $payment;
+            if (in_array($paymentModel->status, [PaymentStatus::Completed, PaymentStatus::Failed], true)) {
+                return $paymentModel;
             }
 
-            $order = $payment->order()->lockForUpdate()->firstOrFail();
+            $order = $paymentModel->order()->lockForUpdate()->firstOrFail();
 
             if ($callback['result_code'] === 0) {
-                $payment->update([
+                $paymentModel->update([
                     'status' => PaymentStatus::Completed,
                     'mpesa_receipt_number' => $callback['receipt_number'],
                     'paid_at' => now(),
@@ -205,17 +209,44 @@ class PaymentService
                         ]);
                 }
 
-                return $payment->fresh();
+                return $paymentModel->fresh();
             }
 
-            $payment->update([
+            $paymentModel->update([
                 'status' => PaymentStatus::Failed,
                 'failed_at' => now(),
                 'failure_reason' => $callback['result_description'],
             ]);
 
-            return $payment->fresh();
+            return $paymentModel->fresh();
         });
+
+        if ($payment) {
+            $this->dispatchPaymentNotifications($payment);
+        }
+
+        return $payment;
+    }
+
+    /**
+     * Dispatch notifications for payment completion or failure.
+     */
+    private function dispatchPaymentNotifications(Payment $payment): void
+    {
+        $order = $payment->order;
+        $user = $payment->user;
+
+        if ($payment->status === PaymentStatus::Completed && $payment->mpesa_receipt_number) {
+            // Notify user of successful payment
+            $user->notify(new PaymentCompletedNotification($order, $payment->mpesa_receipt_number));
+
+            // Notify admins
+            $admins = User::role(['admin', 'super-admin'])->get();
+            Notification::send($admins, new AdminPaymentCompletedNotification($payment));
+        } elseif ($payment->status === PaymentStatus::Failed) {
+            // Notify user of failed payment
+            $user->notify(new PaymentFailedNotification($order, $payment->failure_reason ?? 'Payment failed'));
+        }
     }
 
     private function createAttempt(Order $order, User $user, string $phoneNumber, int $amount): Payment

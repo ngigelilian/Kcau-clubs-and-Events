@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BreadcrumbItem, Payment } from '@/types';
+import { Download } from 'lucide-react';
 
 interface PaginatedPayments {
     data: (Payment & { orderable_name?: string })[];
@@ -47,6 +49,16 @@ export default function PaymentsIndex({ payments }: Props) {
                                     <p className="font-semibold text-foreground">{payment.formatted_amount}</p>
                                     <p>Receipt: {payment.mpesa_receipt_number ?? 'Not yet issued'}</p>
                                     <p>{payment.failure_reason ?? 'Awaiting callback or completed successfully.'}</p>
+
+                                    {payment.status === 'completed' && payment.mpesa_receipt_number && (
+                                        <div className="mt-3">
+                                            <Button asChild size="sm" variant="outline">
+                                                <a href={`/payments/${payment.id}/receipt`}>
+                                                    <Download className="mr-2 h-4 w-4" />Download Receipt
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>

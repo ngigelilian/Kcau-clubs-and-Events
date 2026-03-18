@@ -194,3 +194,32 @@ it('shows student order and payment history pages', function () {
     $this->actingAs($user)->get('/orders')->assertOk();
     $this->actingAs($user)->get('/payments')->assertOk();
 });
+
+it('allows a user to download pdf receipt for completed payment', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->paid()->create(['user_id' => $user->id]);
+    $payment = Payment::factory()->completed()->create([
+        'order_id' => $order->id,
+        'user_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('payments.receipt', $payment))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+});
+
+it('forbids downloading another users payment receipt', function () {
+    $owner = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $order = Order::factory()->paid()->create(['user_id' => $owner->id]);
+    $payment = Payment::factory()->completed()->create([
+        'order_id' => $order->id,
+        'user_id' => $owner->id,
+    ]);
+
+    $this->actingAs($otherUser)
+        ->get(route('payments.receipt', $payment))
+        ->assertForbidden();
+});

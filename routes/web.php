@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('orders', [PaymentController::class, 'orders'])->name('orders.index');
     Route::get('payments', [PaymentController::class, 'payments'])->name('payments.index');
+    Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
 
     // -----------------------------------------------------------------
     // Club Routes (authenticated)

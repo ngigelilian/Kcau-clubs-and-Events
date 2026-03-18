@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { BreadcrumbItem, Merchandise } from '@/types';
 import { ShoppingBag, ShoppingCart, Edit, Tag, Package } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
@@ -21,6 +22,8 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
     const isAdmin = user?.roles?.includes('admin') || user?.roles?.includes('super-admin');
     const canEdit = user?.permissions?.includes('merchandise.update') || isAdmin;
     const [quantity, setQuantity] = useState(1);
+    const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState((user as { phone?: string | null } | null)?.phone ?? '');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Merchandise', href: '/merchandise' },
@@ -29,7 +32,19 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
 
     const handleOrder = (e: FormEvent) => {
         e.preventDefault();
-        router.post(`/merchandise/${item.id}/order`, { quantity });
+        setPhoneDialogOpen(true);
+    };
+
+    const handleConfirmOrder = (e: FormEvent) => {
+        e.preventDefault();
+
+        router.post(
+            `/merchandise/${item.id}/order`,
+            { quantity, phone_number: phoneNumber || undefined },
+            {
+                onSuccess: () => setPhoneDialogOpen(false),
+            },
+        );
     };
 
     return (
@@ -97,11 +112,45 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
                                         />
                                     </div>
                                     <Button type="submit" size="lg" className="flex-1">
-                                        <ShoppingCart className="mr-2 h-4 w-4" />Order Now
+                                        <ShoppingCart className="mr-2 h-4 w-4" />Pay with M-Pesa
                                     </Button>
                                 </div>
                             </form>
                         )}
+
+                        <Dialog open={phoneDialogOpen} onOpenChange={setPhoneDialogOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Confirm Payment Details</DialogTitle>
+                                    <DialogDescription>
+                                        Enter the Safaricom number that will receive the STK push for this order.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <form onSubmit={handleConfirmOrder} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="merch-phone-number">Phone Number</Label>
+                                        <Input
+                                            id="merch-phone-number"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="2547XXXXXXXX or 07XXXXXXXX"
+                                        />
+                                    </div>
+
+                                    <p className="text-sm text-muted-foreground">
+                                        Quantity: {quantity} • Total: {(item.price * quantity / 100).toLocaleString('en-KE', { style: 'currency', currency: 'KES' })}
+                                    </p>
+
+                                    <DialogFooter>
+                                        <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)}>
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit">Send STK Push</Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
 
                         {canEdit && (
                             <div className="pt-2">

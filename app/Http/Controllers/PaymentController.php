@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Requests\Payment\ProcessMpesaCallbackRequest;
 use App\Models\Order;
 use App\Models\Payment;
@@ -76,5 +77,35 @@ class PaymentController extends Controller
             'ResultCode' => 0,
             'ResultDesc' => 'Accepted',
         ]);
+    }
+
+    public function receipt(Request $request, Payment $payment)
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        if ($payment->user_id !== $user->id && ! $user->hasRole(['admin', 'super-admin'])) {
+            abort(403);
+        }
+
+        if (! $payment->isCompleted() || ! $payment->mpesa_receipt_number) {
+            abort(404, 'Receipt not available for this payment yet.');
+        }
+
+        $payment->load(['order.orderable', 'user']);
+
+        $pdf = Pdf::loadView('pdf.receipt', [
+            'payment' => $payment,
+            'order' => $payment->order,
+            'user' => $payment->user,
+            'orderableName' => $payment->order?->orderable?->title
+                ?? $payment->order?->orderable?->name
+                ?? 'Order item',
+        ]);
+
+        return $pdf->download('receipt-'.$payment->mpesa_receipt_number.'.pdf');
     }
 }

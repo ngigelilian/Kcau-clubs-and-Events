@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\AnnouncementAudience;
 use App\Models\Announcement;
 use App\Models\Club;
+use App\Models\User;
+use App\Notifications\AnnouncementPublishedNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -86,7 +89,7 @@ class AnnouncementController extends Controller
             }
         }
 
-        Announcement::create([
+        $announcement = Announcement::create([
             'club_id' => $validated['club_id'] ?? null,
             'user_id' => $request->user()->id,
             'title' => $validated['title'],
@@ -95,6 +98,11 @@ class AnnouncementController extends Controller
             'is_email' => $validated['is_email'] ?? false,
             'published_at' => ($validated['publish_now'] ?? true) ? now() : null,
         ]);
+
+        // If published, notify members immediately
+        if ($announcement->published_at) {
+            $this->notifyMembers($announcement);
+        }
 
         return to_route('announcements.index')
             ->with('success', 'Announcement published successfully.');
@@ -107,5 +115,28 @@ class AnnouncementController extends Controller
         return Inertia::render('announcements/show', [
             'announcement' => $announcement,
         ]);
+    }
+
+    /**
+     * Notify club members or all users of the announcement.
+     */
+    private function notifyMembers(Announcement $announcement): void
+    {
+        // System-wide announcement: notify all active students
+        if (!$announcement->club_id) {
+            $users = User::role('student')->where('is_active', true)->get();
+            Notification::send($users, new AnnouncementPublishedNotification($announcement));
+            return;
+        }
+
+        // Club-specific announcement: notify all active members
+        $club = $announcement->club;
+        $members = $club->memberships()
+            ->where('status', 'active')
+            ->with('user')
+            ->get()
+            ->pluck('user');
+
+        Notification::send($members, new AnnouncementPublishedNotification($announcement));
     }
 }
