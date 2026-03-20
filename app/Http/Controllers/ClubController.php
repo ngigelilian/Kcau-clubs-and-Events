@@ -183,9 +183,13 @@ class ClubController extends Controller
     public function join(Club $club)
     {
         try {
-            $this->clubService->requestJoin($club, auth()->user());
+            $membership = $this->clubService->requestJoin($club, auth()->user());
 
-            return back()->with('success', 'Join request submitted! The club leader will review it.');
+            $message = $membership->membership_fee_due > 0
+                ? 'Join request submitted. Subscription due: KES '.number_format($membership->membership_fee_due / 100, 2).'. The club leader will review your request.'
+                : 'Join request submitted! The club leader will review it.';
+
+            return back()->with('success', $message);
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }

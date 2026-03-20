@@ -30,6 +30,10 @@ export default function ClubCreate({ categories }: Props) {
         description: string;
         category: string;
         max_members: string;
+        membership_type: 'free' | 'subscription' | 'hybrid';
+        membership_fee: string;
+        membership_discount_percent: string;
+        hybrid_free_faculty: string;
         logo: File | null;
         banner: File | null;
     }>({
@@ -37,6 +41,10 @@ export default function ClubCreate({ categories }: Props) {
         description: '',
         category: '',
         max_members: '',
+        membership_type: 'free',
+        membership_fee: '',
+        membership_discount_percent: '',
+        hybrid_free_faculty: '',
         logo: null,
         banner: null,
     });
@@ -131,6 +139,69 @@ export default function ClubCreate({ categories }: Props) {
                                     <p className="text-sm text-destructive">{errors.max_members}</p>
                                 )}
                             </div>
+
+                            {/* Membership Rules */}
+                            <div className="space-y-2">
+                                <Label htmlFor="membership_type">Membership Criteria *</Label>
+                                <Select value={data.membership_type} onValueChange={(v: 'free' | 'subscription' | 'hybrid') => setData('membership_type', v)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select membership criteria" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="free">Free to Join</SelectItem>
+                                        <SelectItem value="subscription">Subscription</SelectItem>
+                                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.membership_type && <p className="text-sm text-destructive">{errors.membership_type}</p>}
+                            </div>
+
+                            {(data.membership_type === 'subscription' || data.membership_type === 'hybrid') && (
+                                <div className="space-y-4 rounded-md border p-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="membership_fee">Subscription Fee (KES) *</Label>
+                                        <Input
+                                            id="membership_fee"
+                                            type="number"
+                                            min={1}
+                                            value={data.membership_fee}
+                                            onChange={(e) => setData('membership_fee', e.target.value)}
+                                            placeholder="e.g. 1000"
+                                        />
+                                        {errors.membership_fee && <p className="text-sm text-destructive">{errors.membership_fee}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="membership_discount_percent">Discount (%) (optional)</Label>
+                                        <Input
+                                            id="membership_discount_percent"
+                                            type="number"
+                                            min={0}
+                                            max={100}
+                                            value={data.membership_discount_percent}
+                                            onChange={(e) => setData('membership_discount_percent', e.target.value)}
+                                            placeholder="e.g. 20"
+                                        />
+                                        {errors.membership_discount_percent && <p className="text-sm text-destructive">{errors.membership_discount_percent}</p>}
+                                    </div>
+
+                                    {data.membership_type === 'hybrid' && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="hybrid_free_faculty">Faculty Eligible for Free Join *</Label>
+                                            <Input
+                                                id="hybrid_free_faculty"
+                                                value={data.hybrid_free_faculty}
+                                                onChange={(e) => setData('hybrid_free_faculty', e.target.value)}
+                                                placeholder="e.g. Information Technology"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Members from this faculty join for free. Others pay the subscription fee.
+                                            </p>
+                                            {errors.hybrid_free_faculty && <p className="text-sm text-destructive">{errors.hybrid_free_faculty}</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Logo Upload */}
                             <div className="space-y-2">

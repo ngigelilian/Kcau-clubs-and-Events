@@ -6,6 +6,9 @@ use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\TicketReply;
+use App\Notifications\TicketReplyNotification;
+use App\Notifications\TicketStatusChangeNotification;
+use App\Notifications\TicketAssignmentNotification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -101,7 +104,7 @@ class TicketController extends Controller
             ->with('success', 'Support ticket submitted successfully.');
     }
 
-    public function show(Ticket $ticket): Response
+    public function show(Request $request, Ticket $ticket): Response
     {
         $this->authorize('view', $ticket);
 
@@ -111,7 +114,7 @@ class TicketController extends Controller
             'replies' => fn ($q) => $q->with('user:id,name,avatar')->orderBy('created_at'),
         ]);
 
-        $isAdmin = auth()->user()->hasRole(['admin', 'super-admin']);
+        $isAdmin = $request->user()->hasRole(['admin', 'super-admin']);
 
         $adminUsers = [];
         if ($isAdmin) {
@@ -135,7 +138,7 @@ class TicketController extends Controller
             'message' => ['required', 'string', 'min:2', 'max:10000'],
         ]);
 
-        TicketReply::create([
+        $reply = TicketReply::create([
             'ticket_id' => $ticket->id,
             'user_id' => $request->user()->id,
             'message' => $validated['message'],
@@ -149,6 +152,16 @@ class TicketController extends Controller
             ]);
         }
 
+        // Notify the other party
+        $reply->load('user');
+        if ($request->user()->hasRole(['admin', 'super-admin'])) {
+            $ticket->user->notify(new TicketReplyNotification($ticket, $reply));
+        } else {
+            if ($ticket->assignee) {
+                $ticket->assignee->notify(new TicketReplyNotification($ticket, $reply));
+            }
+        }
+
         return back()->with('success', 'Reply posted.');
     }
 
@@ -157,13 +170,22 @@ class TicketController extends Controller
         $this->authorize('assign', $ticket);
 
         $validated = $request->validate([
-            'assigned_to' => ['required', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
+        $oldAssignee = $ticket->assigned_to;
         $ticket->update([
-            'assigned_to' => $validated['assigned_to'],
+            'assigned_to' => $validated['assigned_to'] ?? null,
             'status' => $ticket->status === TicketStatus::Open ? TicketStatus::InProgress : $ticket->status,
         ]);
+
+        // Notify the newly assigned admin
+        if ($ticket->assigned_to && $oldAssignee !== $ticket->assigned_to) {
+            $assignee = $ticket->assignee;
+            if ($assignee) {
+                $assignee->notify(new TicketAssignmentNotification($ticket, $request->user()->name));
+            }
+        }
 
         return back()->with('success', 'Ticket assigned successfully.');
     }
@@ -172,10 +194,16 @@ class TicketController extends Controller
     {
         $this->authorize('resolve', $ticket);
 
+        $oldStatus = $ticket->status;
         $ticket->update([
             'status' => TicketStatus::Resolved,
             'resolved_at' => now(),
         ]);
+
+        // Notify ticket submitter
+        if ($oldStatus !== TicketStatus::Resolved) {
+            $ticket->user->notify(new TicketStatusChangeNotification($ticket, $oldStatus->value, TicketStatus::Resolved->value));
+        }
 
         return back()->with('success', 'Ticket marked as resolved.');
     }
@@ -184,10 +212,16 @@ class TicketController extends Controller
     {
         $this->authorize('close', $ticket);
 
+        $oldStatus = $ticket->status;
         $ticket->update([
             'status' => TicketStatus::Closed,
             'closed_at' => now(),
         ]);
+
+        // Notify ticket submitter
+        if ($oldStatus !== TicketStatus::Closed) {
+            $ticket->user->notify(new TicketStatusChangeNotification($ticket, $oldStatus->value, TicketStatus::Closed->value));
+        }
 
         return back()->with('success', 'Ticket closed.');
     }

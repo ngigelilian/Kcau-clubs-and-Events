@@ -4,6 +4,7 @@
 
 export type ClubStatus = 'pending' | 'active' | 'suspended';
 export type ClubCategory = 'academic' | 'cultural' | 'sports' | 'religious' | 'technology' | 'social' | 'other';
+export type ClubMembershipType = 'free' | 'subscription' | 'hybrid';
 export type MembershipRole = 'member' | 'leader' | 'co-leader';
 export type MembershipStatus = 'pending' | 'active' | 'rejected';
 export type EventType = 'club' | 'school';
@@ -35,6 +36,10 @@ export interface Club {
     approved_by: number | null;
     approved_at: string | null;
     max_members: number | null;
+    membership_type: ClubMembershipType;
+    membership_fee: number | null;
+    membership_discount_percent: number | null;
+    hybrid_free_faculty: string | null;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -59,6 +64,8 @@ export interface ClubMembership {
     user_id: number;
     role: MembershipRole;
     status: MembershipStatus;
+    membership_fee_due: number;
+    membership_fee_waived: boolean;
     joined_at: string | null;
     created_at: string;
     updated_at: string;

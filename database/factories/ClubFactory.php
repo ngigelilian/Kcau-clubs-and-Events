@@ -28,6 +28,10 @@ class ClubFactory extends Factory
             'approved_by' => null,
             'approved_at' => null,
             'max_members' => fake()->optional(0.4)->numberBetween(20, 200),
+            'membership_type' => 'free',
+            'membership_fee' => null,
+            'membership_discount_percent' => null,
+            'hybrid_free_faculty' => null,
         ];
     }
 

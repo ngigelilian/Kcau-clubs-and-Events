@@ -34,6 +34,11 @@ const statusBadge: Record<string, { label: string; variant: 'default' | 'seconda
 };
 
 const categoryLabel = (cat: string) => cat.charAt(0).toUpperCase() + cat.slice(1);
+const membershipTypeLabel: Record<'free' | 'subscription' | 'hybrid', string> = {
+    free: 'Free to Join',
+    subscription: 'Subscription',
+    hybrid: 'Hybrid',
+};
 
 export default function ClubShow({ club, leaders, userMembership }: Props) {
     const { auth } = usePage().props as { auth: { user: AuthUser | null } };
@@ -101,6 +106,7 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                                 <Badge variant={status.variant}>{status.label}</Badge>
                                 <Badge variant="outline">{categoryLabel(club.category)}</Badge>
+                                    <Badge variant="outline">{membershipTypeLabel[club.membership_type]}</Badge>
                                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <Users className="h-4 w-4" />
                                     {club.active_members_count ?? 0} members
@@ -128,10 +134,19 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                             </Link>
                         )}
                         {user && !userMembership && club.status === 'active' && (
-                            <Button onClick={handleJoin}>
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Join Club
-                            </Button>
+                            <div className="space-y-2">
+                                <Button onClick={handleJoin}>
+                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    Join Club
+                                </Button>
+                                {club.membership_type !== 'free' && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {club.membership_type === 'subscription'
+                                            ? `Subscription fee applies: KES ${((club.membership_fee ?? 0) / 100).toFixed(2)}`
+                                            : `Hybrid club: ${club.hybrid_free_faculty ?? 'specified faculty'} joins free; others pay KES ${((club.membership_fee ?? 0) / 100).toFixed(2)}`}
+                                    </p>
+                                )}
+                            </div>
                         )}
                         {userMembership?.status === 'pending' && (
                             <Button variant="outline" disabled>
@@ -292,6 +307,28 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Max Members</span>
                                         <span className="font-medium">{club.max_members}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Membership</span>
+                                    <span className="font-medium">{membershipTypeLabel[club.membership_type]}</span>
+                                </div>
+                                {club.membership_type !== 'free' && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Subscription Fee</span>
+                                        <span className="font-medium">KES {((club.membership_fee ?? 0) / 100).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {club.membership_discount_percent !== null && club.membership_discount_percent > 0 && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Discount</span>
+                                        <span className="font-medium">{club.membership_discount_percent}%</span>
+                                    </div>
+                                )}
+                                {club.membership_type === 'hybrid' && club.hybrid_free_faculty && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Hybrid Free Faculty</span>
+                                        <span className="font-medium">{club.hybrid_free_faculty}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">

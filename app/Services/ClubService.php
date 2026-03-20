@@ -21,12 +21,27 @@ class ClubService
     public function createClub(array $data, User $creator): Club
     {
         return DB::transaction(function () use ($data, $creator) {
+            $membershipType = $data['membership_type'];
+            $membershipFee = in_array($membershipType, ['subscription', 'hybrid'], true)
+                ? ($data['membership_fee'] ?? null)
+                : null;
+            $discountPercent = in_array($membershipType, ['subscription', 'hybrid'], true)
+                ? ($data['membership_discount_percent'] ?? null)
+                : null;
+            $hybridFreeFaculty = $membershipType === 'hybrid'
+                ? ($data['hybrid_free_faculty'] ?? null)
+                : null;
+
             $club = Club::create([
                 'name' => $data['name'],
                 'slug' => Str::slug($data['name']),
                 'description' => $data['description'],
                 'category' => $data['category'],
                 'max_members' => $data['max_members'] ?? null,
+                'membership_type' => $membershipType,
+                'membership_fee' => $membershipFee,
+                'membership_discount_percent' => $discountPercent,
+                'hybrid_free_faculty' => $hybridFreeFaculty,
                 'status' => ClubStatus::Pending,
                 'created_by' => $creator->id,
             ]);
@@ -64,12 +79,27 @@ class ClubService
     public function updateClub(Club $club, array $data): Club
     {
         return DB::transaction(function () use ($club, $data) {
+            $membershipType = $data['membership_type'];
+            $membershipFee = in_array($membershipType, ['subscription', 'hybrid'], true)
+                ? ($data['membership_fee'] ?? null)
+                : null;
+            $discountPercent = in_array($membershipType, ['subscription', 'hybrid'], true)
+                ? ($data['membership_discount_percent'] ?? null)
+                : null;
+            $hybridFreeFaculty = $membershipType === 'hybrid'
+                ? ($data['hybrid_free_faculty'] ?? null)
+                : null;
+
             $club->update([
                 'name' => $data['name'],
                 'slug' => Str::slug($data['name']),
                 'description' => $data['description'],
                 'category' => $data['category'],
                 'max_members' => $data['max_members'] ?? $club->max_members,
+                'membership_type' => $membershipType,
+                'membership_fee' => $membershipFee,
+                'membership_discount_percent' => $discountPercent,
+                'hybrid_free_faculty' => $hybridFreeFaculty,
             ]);
 
             if (isset($data['logo'])) {
@@ -182,6 +212,9 @@ class ClubService
      */
     public function requestJoin(Club $club, User $user): ClubMembership
     {
+        $feeDue = $club->membershipFeeForUser($user);
+        $feeWaived = $feeDue === 0;
+
         // Check if user already has a membership record
         $existing = $club->memberships()
             ->where('user_id', $user->id)
@@ -198,6 +231,8 @@ class ClubService
             $existing->update([
                 'status' => MembershipStatus::Pending,
                 'role' => MembershipRole::Member,
+                'membership_fee_due' => $feeDue,
+                'membership_fee_waived' => $feeWaived,
             ]);
 
             return $existing->fresh();
@@ -207,6 +242,8 @@ class ClubService
             'user_id' => $user->id,
             'role' => MembershipRole::Member,
             'status' => MembershipStatus::Pending,
+            'membership_fee_due' => $feeDue,
+            'membership_fee_waived' => $feeWaived,
         ]);
     }
 

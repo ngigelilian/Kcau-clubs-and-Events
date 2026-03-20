@@ -49,6 +49,7 @@ it('promotes proposer membership to active leader when club is approved', functi
         'description' => str_repeat('Robotics innovation and practical projects. ', 3),
         'category' => ClubCategory::Technology->value,
         'max_members' => 100,
+        'membership_type' => 'free',
     ])->assertRedirect();
 
     $club = Club::where('name', 'Milestone Robotics Club')->firstOrFail();

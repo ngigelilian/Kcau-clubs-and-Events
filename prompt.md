@@ -194,6 +194,13 @@ Define all roles and granular permissions via `Spatie\Permission`. Seed roles an
 ### Module 1: Club Management
 - Club discovery page with search, filter by category, sort by popularity (member count)
 - Club profile/detail page: description, leaders, member count, upcoming events, merchandise catalog
+- Club membership criteria modes set by club leaders during club setup/edit:
+  - `free`: all users can request to join with no subscription fee
+  - `subscription`: users join through subscription criteria with a leader-defined fee and optional discount
+  - `hybrid`: users from a configured faculty join for free, while users from other faculties join via subscription fee
+- For hybrid clubs, `hybrid_free_faculty` must be configured and compared against the user's faculty/department profile field.
+- Subscription fees are stored in cents and can include optional percentage discounts configured by club leaders.
+- Users can be members of multiple clubs simultaneously (unique per club, not globally unique).
 - **Join request flow:** Student clicks "Join" → request created with `status: pending` → Club Leader approves/rejects → Student notified via email + in-app
 - **Club registration flow:** Any student can propose a new club → fills registration form → Admin reviews and approves/rejects → If approved, proposer becomes Club Leader automatically
 - Club Leader can invite/promote members to `co-leader` role
@@ -275,7 +282,7 @@ Generate and export reports as PDF (queued generation) and Excel (via Laravel Ex
 - Scheduled weekly summary email to Super Admin and Admins (via `schedule:run`)
 - All report generation logged in `reports` table with `status` tracking
 
-### Module 7: Support Ticketing
+### Module 7: Support Ticketing ✓ Implemented
 - Students and Club Leaders submit tickets with subject, description, priority (low/medium/high)
 - Admin/Super Admin views ticket queue with filters (status, priority, assignee, date)
 - Admin assigns ticket to self or another admin
@@ -442,7 +449,7 @@ database/
 7. **Merchandise:** Listing CRUD, purchase flow with M-Pesa, stock management, fulfillment tracking
 8. **Notifications & Announcements:** Email + in-app notifications for all triggers, notification center UI, club announcements
 9. **Reporting & Analytics:** Admin dashboard with summary stats, PDF/Excel report generation, scheduled weekly digest
-10. **Support Ticketing:** Ticket submission, admin queue, threaded replies, assignment, SLA tracking
+10. **Support Ticketing:** Ticket submission, admin queue, threaded replies, assignment, SLA tracking ✓
 11. **Activity Logs:** Full audit trail UI, admin log viewer with filters
 12. **Polish & Hardening:** Performance optimization (caching, eager loading audit), security hardening, responsive QA, error pages, accessibility audit
 

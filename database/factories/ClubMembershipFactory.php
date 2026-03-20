@@ -20,6 +20,8 @@ class ClubMembershipFactory extends Factory
             'user_id' => User::factory(),
             'role' => MembershipRole::Member,
             'status' => MembershipStatus::Active,
+            'membership_fee_due' => 0,
+            'membership_fee_waived' => true,
             'joined_at' => now()->subDays(fake()->numberBetween(1, 180)),
         ];
     }

@@ -223,3 +223,17 @@ it('forbids downloading another users payment receipt', function () {
         ->get(route('payments.receipt', $payment))
         ->assertForbidden();
 });
+
+it('returns not found for receipt when payment is not completed', function () {
+    $user = User::factory()->create();
+    $order = Order::factory()->create(['user_id' => $user->id]);
+    $payment = Payment::factory()->initiated()->create([
+        'order_id' => $order->id,
+        'user_id' => $user->id,
+        'mpesa_receipt_number' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('payments.receipt', $payment))
+        ->assertNotFound();
+});

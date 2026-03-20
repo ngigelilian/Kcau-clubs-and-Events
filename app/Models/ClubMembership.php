@@ -20,6 +20,8 @@ class ClubMembership extends Model
         'user_id',
         'role',
         'status',
+        'membership_fee_due',
+        'membership_fee_waived',
         'joined_at',
     ];
 
@@ -31,6 +33,8 @@ class ClubMembership extends Model
         return [
             'role' => MembershipRole::class,
             'status' => MembershipStatus::class,
+            'membership_fee_due' => 'integer',
+            'membership_fee_waived' => 'boolean',
             'joined_at' => 'datetime',
         ];
     }

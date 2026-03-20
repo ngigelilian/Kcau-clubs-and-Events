@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\RegistrationStatus;
 use App\Models\EventRegistration;
 use App\Notifications\EventReminderNotification;
 use Illuminate\Console\Command;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 
 class SendEventRemindersCommand extends Command
@@ -37,7 +37,7 @@ class SendEventRemindersCommand extends Command
 
         $registrations = EventRegistration::query()
             ->with(['user', 'event'])
-            ->where('status', 'confirmed')
+            ->where('status', RegistrationStatus::Registered)
             ->whereHas('event', function ($q) use ($startMin, $startMax) {
                 $q->whereBetween('start_datetime', [$startMin, $startMax]);
             })

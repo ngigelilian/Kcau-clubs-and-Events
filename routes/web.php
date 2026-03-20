@@ -3,9 +3,10 @@
 use App\Http\Controllers\Admin\ClubApprovalController;
 use App\Http\Controllers\Admin\EventApprovalController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ClubController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MerchandiseController;
@@ -150,6 +151,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show');
         Route::post('/users/{user}/toggle-active', [UserManagementController::class, 'toggleActive'])->name('users.toggle-active');
         Route::put('/users/{user}/role', [UserManagementController::class, 'updateRole'])->name('users.update-role');
+        
+        // Ticket Management
+        Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
     });
 });
 

@@ -1,0 +1,309 @@
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import AppLayout from '@/layouts/app-layout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DataPagination from '@/components/shared/data-pagination';
+import type { BreadcrumbItem, Ticket, PaginatedResponse, User } from '@/types';
+import { AlertCircle, Clock, MessageCircle } from 'lucide-react';
+
+interface Props {
+    tickets: PaginatedResponse<Ticket>;
+    filters: {
+        status: string;
+        priority: string;
+        assigned_to: string;
+        search: string;
+        date_from: string;
+        date_to: string;
+    };
+    statusCounts: {
+        total: number;
+        open: number;
+        in_progress: number;
+        resolved: number;
+        closed: number;
+        overdue: number;
+    };
+    adminUsers: User[];
+    priorities: Array<{ value: string; label: string }>;
+    statuses: Array<{ value: string; label: string }>;
+}
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Admin', href: '/admin' },
+    { title: 'Support Tickets', href: '/admin/tickets' },
+];
+
+function statusBadge(status: string) {
+    const map: Record<string, string> = {
+        open: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+        in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+        resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        closed: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+    };
+    return map[status] || 'bg-gray-100 text-gray-800';
+}
+
+function priorityBadge(priority: string) {
+    const map: Record<string, string> = {
+        low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+        medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+        high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    };
+    return map[priority] || 'bg-gray-100 text-gray-800';
+}
+
+export default function AdminTicketsIndex({
+    tickets,
+    filters,
+    statusCounts,
+    adminUsers,
+    priorities,
+    statuses,
+}: Props) {
+    const [searchValue, setSearchValue] = useState(filters.search);
+
+    const handleFilter = (key: string, value: string) => {
+        const newFilters = { ...filters, [key]: value };
+        const params = new URLSearchParams();
+        Object.entries(newFilters).forEach(([k, v]) => {
+            if (v) params.append(k, v);
+        });
+        router.visit(`/admin/tickets?${params.toString()}`);
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleFilter('search', searchValue);
+    };
+
+    const handleReset = () => {
+        setSearchValue('');
+        router.visit('/admin/tickets');
+    };
+
+    const isOverdue = (createdAt: string) => {
+        const hoursAgo = (new Date().getTime() - new Date(createdAt).getTime()) / (1000 * 60 * 60);
+        return hoursAgo > 48;
+    };
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Support Ticket Queue" />
+            <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Support Ticket Queue</h1>
+                    <p className="text-muted-foreground">Manage and respond to customer support tickets</p>
+                </div>
+
+                {/* Status Summary Cards */}
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-blue-600">{statusCounts.total}</p>
+                                <p className="text-sm text-muted-foreground">Total</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-red-600">{statusCounts.open}</p>
+                                <p className="text-sm text-muted-foreground">Open</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-yellow-600">{statusCounts.in_progress}</p>
+                                <p className="text-sm text-muted-foreground">In Progress</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-green-600">{statusCounts.resolved}</p>
+                                <p className="text-sm text-muted-foreground">Resolved</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-gray-600">{statusCounts.closed}</p>
+                                <p className="text-sm text-muted-foreground">Closed</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className={statusCounts.overdue > 0 ? 'border-red-300 bg-red-50 dark:bg-red-950' : ''}>
+                        <CardContent className="pt-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-orange-600">{statusCounts.overdue}</p>
+                                <p className="text-sm text-muted-foreground">Overdue (48h+)</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Filters */}
+                <Card>
+                    <CardContent className="pt-6 space-y-4">
+                        <form onSubmit={handleSearch} className="space-y-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6">
+                                <Input
+                                    placeholder="Search tickets..."
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                    className="h-10"
+                                />
+                                <Select value={filters.status} onValueChange={(value) => handleFilter('status', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">All Statuses</SelectItem>
+                                        {statuses.map((s) => (
+                                            <SelectItem key={s.value} value={s.value}>
+                                                {s.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={filters.priority} onValueChange={(value) => handleFilter('priority', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Priority" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">All Priorities</SelectItem>
+                                        {priorities.map((p) => (
+                                            <SelectItem key={p.value} value={p.value}>
+                                                {p.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={filters.assigned_to} onValueChange={(value) => handleFilter('assigned_to', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Assigned To" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">All Admins</SelectItem>
+                                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                                        {adminUsers.map((u) => (
+                                            <SelectItem key={u.id} value={u.id.toString()}>
+                                                {u.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex gap-2 sm:col-span-2 lg:col-span-1 xl:col-span-1">
+                                    <Button type="submit" variant="default" size="sm">
+                                        Search
+                                    </Button>
+                                    <Button type="button" variant="outline" size="sm" onClick={handleReset}>
+                                        Reset
+                                    </Button>
+                                </div>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                {/* Tickets Table */}
+                {tickets.data.length > 0 ? (
+                    <Card>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>ID</TableHead>
+                                            <TableHead>Subject</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Priority</TableHead>
+                                            <TableHead>Assigned To</TableHead>
+                                            <TableHead>Created</TableHead>
+                                            <TableHead>Replies</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {tickets.data.map((ticket) => (
+                                            <TableRow
+                                                key={ticket.id}
+                                                className="cursor-pointer hover:bg-muted/50"
+                                                onClick={() => router.visit(`/admin/tickets/${ticket.id}`)}
+                                            >
+                                                <TableCell className="font-mono text-sm">#{ticket.id}</TableCell>
+                                                <TableCell>
+                                                    <div className="space-y-1">
+                                                        <p className="font-medium max-w-xs truncate">{ticket.subject}</p>
+                                                        <p className="text-xs text-muted-foreground">{ticket.user?.name}</p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={statusBadge(ticket.status)}>
+                                                        {ticket.status.replace('_', ' ')}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={priorityBadge(ticket.priority)}>
+                                                        {ticket.priority}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {ticket.assignee ? (
+                                                        <div className="flex items-center gap-2">
+                                                            {ticket.assignee.avatar && (
+                                                                <img
+                                                                    src={ticket.assignee.avatar}
+                                                                    alt={ticket.assignee.name}
+                                                                    className="h-6 w-6 rounded-full"
+                                                                />
+                                                            )}
+                                                            <span className="text-sm">{ticket.assignee.name}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-sm text-muted-foreground italic">Unassigned</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-1">
+                                                        {isOverdue(ticket.created_at) && (
+                                                            <AlertCircle className="h-4 w-4 text-orange-600" />
+                                                        )}
+                                                        <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                        <MessageCircle className="h-4 w-4" />
+                                                        {ticket.replies_count ?? 0}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+                        <Clock className="h-12 w-12 text-muted-foreground/40 mb-4" />
+                        <p className="text-lg font-medium text-muted-foreground">No tickets found</p>
+                        <p className="mt-1 text-sm text-muted-foreground">Adjust your filters or check back later.</p>
+                    </div>
+                )}
+                <DataPagination data={tickets} />
+            </div>
+        </AppLayout>
+    );
+}
