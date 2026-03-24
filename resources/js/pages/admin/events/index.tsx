@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { BreadcrumbItem, Event, PaginatedResponse } from '@/types';
 import { CalendarDays, MapPin, Eye } from 'lucide-react';
 import { useCallback } from 'react';
+import { eventStatusBadge } from '@/lib/color-badges';
 
 interface Filters { status: string; }
 interface Props {
@@ -20,18 +21,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: '/admin/events' },
     { title: 'Manage Events', href: '/admin/events' },
 ];
-
-function statusColor(status: string) {
-    const map: Record<string, string> = {
-        approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-        rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
-}
 
 export default function AdminEventIndex({ events, filters }: Props) {
     const handleStatusFilter = useCallback((value: string) => {
@@ -82,7 +71,7 @@ export default function AdminEventIndex({ events, filters }: Props) {
                                         </TableCell>
                                         <TableCell className="text-sm">{event.club?.name || 'School-Wide'}</TableCell>
                                         <TableCell className="text-sm">{new Date(event.start_datetime).toLocaleDateString()}</TableCell>
-                                        <TableCell><Badge className={statusColor(event.status)}>{event.status}</Badge></TableCell>
+                                        <TableCell><Badge className={eventStatusBadge(event.status)}>{event.status}</Badge></TableCell>
                                         <TableCell><Badge variant="outline">{event.type}</Badge></TableCell>
                                         <TableCell className="text-right">
                                             <Link href={`/admin/events/${event.slug}`}>

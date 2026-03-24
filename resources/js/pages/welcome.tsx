@@ -202,8 +202,8 @@ export default function Welcome({
                             {/* Badge */}
                             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-sm">
                                 <span className="relative flex size-2">
-                                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
-                                    <span className="relative inline-flex size-2 rounded-full bg-green-500" />
+                                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
+                                    <span className="relative inline-flex size-2 rounded-full bg-success" />
                                 </span>
                                 Now live for KCA University
                             </div>
@@ -259,9 +259,9 @@ export default function Welcome({
                                     {/* Mock browser bar */}
                                     <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                                         <div className="flex gap-1.5">
-                                            <div className="size-3 rounded-full bg-red-400/80" />
-                                            <div className="size-3 rounded-full bg-yellow-400/80" />
-                                            <div className="size-3 rounded-full bg-green-400/80" />
+                                            <div className="size-3 rounded-full bg-destructive/80" />
+                                            <div className="size-3 rounded-full bg-warning/80" />
+                                            <div className="size-3 rounded-full bg-success/80" />
                                         </div>
                                         <div className="mx-auto flex h-7 w-full max-w-md items-center justify-center rounded-md bg-muted px-4 text-xs text-muted-foreground">
                                             events.kcau.ac.ke
@@ -276,7 +276,7 @@ export default function Welcome({
                                                 <UsersIcon className="size-4 text-muted-foreground" />
                                             </div>
                                             <p className="mt-2 text-2xl font-bold">4</p>
-                                            <p className="mt-1 text-xs text-green-600 dark:text-green-400">+2 new this semester</p>
+                                            <p className="mt-1 text-xs text-success">+2 new this semester</p>
                                         </div>
                                         <div className="rounded-lg border border-border bg-muted/30 p-4">
                                             <div className="flex items-center justify-between">
@@ -284,7 +284,7 @@ export default function Welcome({
                                                 <CalendarIcon className="size-4 text-muted-foreground" />
                                             </div>
                                             <p className="mt-2 text-2xl font-bold">7</p>
-                                            <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">3 this week</p>
+                                            <p className="mt-1 text-xs text-info">3 this week</p>
                                         </div>
                                         <div className="rounded-lg border border-border bg-muted/30 p-4">
                                             <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export default function Welcome({
                                                 <BellIcon className="size-4 text-muted-foreground" />
                                             </div>
                                             <p className="mt-2 text-2xl font-bold">12</p>
-                                            <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">5 unread</p>
+                                            <p className="mt-1 text-xs text-warning">5 unread</p>
                                         </div>
                                         {/* Mock event list */}
                                         <div className="rounded-lg border border-border bg-muted/30 p-4 lg:col-span-2">
@@ -452,10 +452,10 @@ export default function Welcome({
                             <div className="relative">
                                 <div className="space-y-4">
                                     {[
-                                        { name: 'KCAU Tech Club', members: 142, category: 'Technology', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-                                        { name: 'Entrepreneurship Society', members: 98, category: 'Business', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-                                        { name: 'Drama & Arts Club', members: 76, category: 'Culture', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
-                                        { name: 'Sports & Fitness', members: 210, category: 'Sports', color: 'bg-green-500/10 text-green-600 dark:text-green-400' },
+                                        { name: 'KCAU Tech Club', members: 142, category: 'Technology', color: 'bg-info/15 text-info' },
+                                        { name: 'Entrepreneurship Society', members: 98, category: 'Business', color: 'bg-warning/15 text-warning' },
+                                        { name: 'Drama & Arts Club', members: 76, category: 'Culture', color: 'bg-accent/15 text-accent-foreground' },
+                                        { name: 'Sports & Fitness', members: 210, category: 'Sports', color: 'bg-success/15 text-success' },
                                     ].map((club) => (
                                         <div
                                             key={club.name}

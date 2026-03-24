@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { BreadcrumbItem, Merchandise } from '@/types';
 import { ShoppingBag, ShoppingCart, Edit, Tag, Package } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { badgeTone } from '@/lib/color-badges';
 
 interface Props {
     merchandise: Merchandise;
@@ -77,7 +78,7 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
                             <div className="flex items-center gap-3 mt-3">
                                 <span className="text-3xl font-bold text-primary">{item.formatted_price}</span>
                                 {item.status === 'available' ? (
-                                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">In Stock</Badge>
+                                    <Badge className={badgeTone.success}>In Stock</Badge>
                                 ) : (
                                     <Badge variant="destructive">{item.status === 'out_of_stock' ? 'Out of Stock' : 'Discontinued'}</Badge>
                                 )}

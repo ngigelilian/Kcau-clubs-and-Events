@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import type { BreadcrumbItem, Event, EventRegistration } from '@/types';
 import { CalendarDays, MapPin, Users, Clock, DollarSign, Edit, UserPlus, UserMinus, CheckCircle } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { badgeTone, eventStatusBadge } from '@/lib/color-badges';
 
 interface Props {
     event: Event;
@@ -22,18 +23,6 @@ function formatDate(date: string) {
 }
 function formatTime(date: string) {
     return new Date(date).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
-}
-
-function statusBadge(status: string) {
-    const map: Record<string, string> = {
-        approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-        rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
 }
 
 export default function EventShow({ event, userRegistration }: Props) {
@@ -91,7 +80,7 @@ export default function EventShow({ event, userRegistration }: Props) {
                     <div className="flex-1 space-y-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <Badge className={statusBadge(event.status)}>{event.status}</Badge>
+                                <Badge className={eventStatusBadge(event.status)}>{event.status}</Badge>
                                 <Badge variant="outline">{event.type === 'club' ? 'Club Event' : 'School-Wide'}</Badge>
                             </div>
                             <h1 className="text-3xl font-bold tracking-tight">{event.title}</h1>
@@ -202,7 +191,7 @@ export default function EventShow({ event, userRegistration }: Props) {
                                     )}
                                     {userRegistration && userRegistration.status === 'registered' && (
                                         <>
-                                            <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-950 rounded-lg p-3">
+                                            <div className={`flex items-center gap-2 rounded-lg p-3 ${badgeTone.success}`}>
                                                 <CheckCircle className="h-5 w-5" />
                                                 <span className="font-medium">You're registered!</span>
                                             </div>
@@ -212,7 +201,7 @@ export default function EventShow({ event, userRegistration }: Props) {
                                         </>
                                     )}
                                     {userRegistration && userRegistration.status === 'attended' && (
-                                        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 dark:bg-blue-950 rounded-lg p-3">
+                                        <div className={`flex items-center gap-2 rounded-lg p-3 ${badgeTone.info}`}>
                                             <CheckCircle className="h-5 w-5" />
                                             <span className="font-medium">Attended</span>
                                         </div>

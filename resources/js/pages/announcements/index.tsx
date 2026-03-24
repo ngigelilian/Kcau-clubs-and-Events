@@ -6,21 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { BreadcrumbItem, Announcement, PaginatedResponse } from '@/types';
 import { Bell, Plus, Megaphone } from 'lucide-react';
+import { announcementAudienceBadge } from '@/lib/color-badges';
 
 interface Props {
     announcements: PaginatedResponse<Announcement>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Announcements', href: '/announcements' }];
-
-function audienceBadge(audience: string) {
-    const map: Record<string, string> = {
-        all_students: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        club_members: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-        leaders_only: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-    };
-    return map[audience] || 'bg-gray-100 text-gray-800';
-}
 
 export default function AnnouncementIndex({ announcements }: Props) {
     const { auth } = usePage().props as { auth: { user: { permissions: string[] } | null } };
@@ -57,7 +49,7 @@ export default function AnnouncementIndex({ announcements }: Props) {
                                                     <h3 className="font-semibold text-lg">{item.title}</h3>
                                                     <p className="text-sm text-muted-foreground line-clamp-2">{item.content}</p>
                                                     <div className="flex items-center gap-3 pt-1">
-                                                        <Badge className={audienceBadge(item.audience)}>{item.audience.replace('_', ' ')}</Badge>
+                                                        <Badge className={announcementAudienceBadge(item.audience)}>{item.audience.replace('_', ' ')}</Badge>
                                                         {item.club && <span className="text-sm text-muted-foreground">{item.club.name}</span>}
                                                         <span className="text-xs text-muted-foreground">{new Date(item.published_at || item.created_at).toLocaleDateString()}</span>
                                                     </div>

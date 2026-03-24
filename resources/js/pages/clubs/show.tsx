@@ -81,8 +81,10 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                             className="h-48 w-full object-cover sm:h-64"
                         />
                     ) : (
-                        <div className="flex h-48 items-center justify-center bg-gradient-to-br from-[#182b5c] to-[#2a4a8c] sm:h-64">
-                            <span className="text-6xl font-bold text-white/30">{club.name.charAt(0)}</span>
+                        // ✅ Was: bg-gradient-to-br from-[#182b5c] to-[#2a4a8c]
+                        // Now uses primary token (maps to #0B3D91 deep blue)
+                        <div className="flex h-48 items-center justify-center bg-gradient-to-br from-primary to-primary/70 sm:h-64">
+                            <span className="text-6xl font-bold text-primary-foreground/30">{club.name.charAt(0)}</span>
                         </div>
                     )}
                 </div>
@@ -106,7 +108,7 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                                 <Badge variant={status.variant}>{status.label}</Badge>
                                 <Badge variant="outline">{categoryLabel(club.category)}</Badge>
-                                    <Badge variant="outline">{membershipTypeLabel[club.membership_type]}</Badge>
+                                <Badge variant="outline">{membershipTypeLabel[club.membership_type]}</Badge>
                                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <Users className="h-4 w-4" />
                                     {club.active_members_count ?? 0} members
@@ -265,7 +267,8 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Crown className="h-5 w-5 text-[#d0b216]" />
+                                    {/* ✅ Was: text-[#d0b216] — now uses accent token (maps to #F2A900 gold) */}
+                                    <Crown className="h-5 w-5 text-accent" />
                                     Leadership
                                 </CardTitle>
                             </CardHeader>
@@ -282,8 +285,9 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                                 {m.role === 'leader' ? 'Leader' : 'Co-Leader'}
                                             </p>
                                         </div>
+                                        {/* ✅ Was: text-[#d0b216] — now uses accent token */}
                                         {m.role === 'leader' ? (
-                                            <ShieldCheck className="h-4 w-4 text-[#d0b216]" />
+                                            <ShieldCheck className="h-4 w-4 text-accent" />
                                         ) : null}
                                     </div>
                                 ))}

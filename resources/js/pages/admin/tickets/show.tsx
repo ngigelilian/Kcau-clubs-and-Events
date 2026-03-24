@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, Clock, Send, Loader2 } from 'lucide-react';
 import type { BreadcrumbItem, Ticket, User } from '@/types';
+import { badgeTone, ticketPriorityBadge, ticketStatusBadge } from '@/lib/color-badges';
 
 interface Props {
     ticket: Ticket;
@@ -20,25 +21,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tickets', href: '/admin/tickets' },
     { title: `#${0}`, href: '' }, // Will be set dynamically
 ];
-
-function statusBadge(status: string) {
-    const map: Record<string, string> = {
-        open: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        closed: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
-}
-
-function priorityBadge(priority: string) {
-    const map: Record<string, string> = {
-        low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-        medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-    };
-    return map[priority] || 'bg-gray-100 text-gray-800';
-}
 
 export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props) {
     const [replyMessage, setReplyMessage] = useState('');
@@ -87,7 +69,7 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-2xl font-bold">{ticket.subject}</h1>
                             {isOverdue && (
-                                <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium dark:bg-orange-900 dark:text-orange-300">
+                                <div className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${badgeTone.warning}`}>
                                     <AlertCircle className="h-3 w-3" />
                                     Overdue (48h+)
                                 </div>
@@ -101,10 +83,10 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
                     </div>
                     <div className="flex flex-col gap-2">
                         <div className="flex gap-2">
-                            <Badge className={statusBadge(ticket.status)}>
+                            <Badge className={ticketStatusBadge(ticket.status)}>
                                 {ticket.status.replace('_', ' ')}
                             </Badge>
-                            <Badge className={priorityBadge(ticket.priority)}>
+                            <Badge className={ticketPriorityBadge(ticket.priority)}>
                                 {ticket.priority} Priority
                             </Badge>
                         </div>
@@ -229,7 +211,7 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
                                     </Select>
                                 </div>
                                 {ticket.assignee && (
-                                    <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-950 rounded">
+                                    <div className={`flex items-center gap-2 rounded p-2 ${badgeTone.info}`}>
                                         {ticket.assignee.avatar && (
                                             <img
                                                 src={ticket.assignee.avatar}
@@ -251,7 +233,7 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
                             <CardContent className="space-y-3">
                                 <div className="flex items-center justify-between p-3 border rounded bg-muted/50">
                                     <span className="text-sm font-medium">Current: {ticket.status.replace('_', ' ')}</span>
-                                    <Badge className={statusBadge(ticket.status)}>
+                                    <Badge className={ticketStatusBadge(ticket.status)}>
                                         {ticket.status.replace('_', ' ')}
                                     </Badge>
                                 </div>

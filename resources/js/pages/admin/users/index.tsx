@@ -126,7 +126,7 @@ export default function AdminUserIndex({ users, filters, roles }: Props) {
                                                     <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
                                                 </Link>
                                                 <Button variant="ghost" size="sm" onClick={() => toggleActive(user.id)} title={user.is_active ? 'Deactivate' : 'Activate'}>
-                                                    {user.is_active ? <UserX className="h-4 w-4 text-destructive" /> : <UserCheck className="h-4 w-4 text-green-600" />}
+                                                    {user.is_active ? <UserX className="h-4 w-4 text-destructive" /> : <UserCheck className="h-4 w-4 text-success" />}
                                                 </Button>
                                             </div>
                                         </TableCell>

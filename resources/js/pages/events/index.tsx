@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { BreadcrumbItem, Event, PaginatedResponse } from '@/types';
 import { CalendarDays, MapPin, Plus, Search, Users, Clock } from 'lucide-react';
 import { useState, useCallback, type FormEvent } from 'react';
+import { eventStatusBadge } from '@/lib/color-badges';
 
 interface EventType { value: string; label: string; }
 interface Filters { search: string; type: string; filter: string; }
@@ -25,16 +26,6 @@ function formatDate(date: string) {
 }
 function formatTime(date: string) {
     return new Date(date).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
-}
-
-function statusColor(status: string) {
-    const map: Record<string, string> = {
-        approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
 }
 
 export default function EventIndex({ events, filters, eventTypes }: Props) {
@@ -107,7 +98,7 @@ export default function EventIndex({ events, filters, eventTypes }: Props) {
                                                 </div>
                                             )}
                                             <div className="absolute top-3 left-3 flex gap-2">
-                                                <Badge className={statusColor(event.status)}>{event.status}</Badge>
+                                                <Badge className={eventStatusBadge(event.status)}>{event.status}</Badge>
                                                 {event.is_paid && <Badge variant="secondary">{event.formatted_fee}</Badge>}
                                                 {!event.is_paid && <Badge variant="outline" className="bg-background/80">Free</Badge>}
                                             </div>

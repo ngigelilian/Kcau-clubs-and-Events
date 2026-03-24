@@ -40,22 +40,31 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 function statusBadge(status: string) {
+    // ✅ Replaced raw Tailwind color classes with semantic token-based classes
+    // open      → destructive-toned (red-ish) using destructive token
+    // in_progress → primary-toned (blue) using primary token
+    // resolved  → success-toned using a muted success pattern
+    // closed    → neutral muted
     const map: Record<string, string> = {
-        open: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        closed: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+        open:        'bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive',
+        in_progress: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
+        resolved:    'bg-accent/10 text-accent-foreground dark:bg-accent/20 dark:text-accent-foreground',
+        closed:      'bg-muted text-muted-foreground',
     };
-    return map[status] || 'bg-gray-100 text-gray-800';
+    return map[status] || 'bg-muted text-muted-foreground';
 }
 
 function priorityBadge(priority: string) {
+    // ✅ Replaced raw Tailwind color classes with semantic token-based classes
+    // low    → neutral muted
+    // medium → accent-toned (gold) using accent token
+    // high   → destructive-toned using destructive token
     const map: Record<string, string> = {
-        low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-        medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+        low:    'bg-muted text-muted-foreground',
+        medium: 'bg-accent/15 text-accent-foreground dark:bg-accent/20 dark:text-accent-foreground',
+        high:   'bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive',
     };
-    return map[priority] || 'bg-gray-100 text-gray-800';
+    return map[priority] || 'bg-muted text-muted-foreground';
 }
 
 export default function AdminTicketsIndex({
@@ -106,7 +115,7 @@ export default function AdminTicketsIndex({
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-blue-600">{statusCounts.total}</p>
+                                <p className="text-2xl font-bold text-primary">{statusCounts.total}</p>
                                 <p className="text-sm text-muted-foreground">Total</p>
                             </div>
                         </CardContent>
@@ -114,7 +123,7 @@ export default function AdminTicketsIndex({
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-red-600">{statusCounts.open}</p>
+                                <p className="text-2xl font-bold text-destructive">{statusCounts.open}</p>
                                 <p className="text-sm text-muted-foreground">Open</p>
                             </div>
                         </CardContent>
@@ -122,7 +131,7 @@ export default function AdminTicketsIndex({
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-yellow-600">{statusCounts.in_progress}</p>
+                                <p className="text-2xl font-bold text-accent">{statusCounts.in_progress}</p>
                                 <p className="text-sm text-muted-foreground">In Progress</p>
                             </div>
                         </CardContent>
@@ -130,7 +139,7 @@ export default function AdminTicketsIndex({
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-green-600">{statusCounts.resolved}</p>
+                                <p className="text-2xl font-bold text-primary/70">{statusCounts.resolved}</p>
                                 <p className="text-sm text-muted-foreground">Resolved</p>
                             </div>
                         </CardContent>
@@ -138,15 +147,15 @@ export default function AdminTicketsIndex({
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-gray-600">{statusCounts.closed}</p>
+                                <p className="text-2xl font-bold text-muted-foreground">{statusCounts.closed}</p>
                                 <p className="text-sm text-muted-foreground">Closed</p>
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className={statusCounts.overdue > 0 ? 'border-red-300 bg-red-50 dark:bg-red-950' : ''}>
+                    <Card className={statusCounts.overdue > 0 ? 'border-destructive/40 bg-destructive/5 dark:bg-destructive/10' : ''}>
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-orange-600">{statusCounts.overdue}</p>
+                                <p className="text-2xl font-bold text-destructive">{statusCounts.overdue}</p>
                                 <p className="text-sm text-muted-foreground">Overdue (48h+)</p>
                             </div>
                         </CardContent>
@@ -277,7 +286,7 @@ export default function AdminTicketsIndex({
                                                 <TableCell className="text-sm text-muted-foreground">
                                                     <div className="flex items-center gap-1">
                                                         {isOverdue(ticket.created_at) && (
-                                                            <AlertCircle className="h-4 w-4 text-orange-600" />
+                                                            <AlertCircle className="h-4 w-4 text-destructive" />
                                                         )}
                                                         <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
                                                     </div>

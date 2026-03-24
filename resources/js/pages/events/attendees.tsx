@@ -80,7 +80,7 @@ export default function EventAttendees({ event, registrations }: Props) {
                                                 </Button>
                                             )}
                                             {reg.status === 'attended' && (
-                                                <span className="text-sm text-green-600 flex items-center gap-1 justify-end">
+                                                <span className="flex items-center justify-end gap-1 text-sm text-success">
                                                     <CheckCircle className="h-4 w-4" /> Attended
                                                 </span>
                                             )}

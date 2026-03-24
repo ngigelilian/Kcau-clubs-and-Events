@@ -14,21 +14,10 @@ import type { BreadcrumbItem, Event } from '@/types';
 import { CalendarDays, MapPin, Users, CheckCircle, XCircle, Ban, Flag } from 'lucide-react';
 import { useState } from 'react';
 import type { FormDataConvertible } from '@inertiajs/core';
+import { eventStatusBadge } from '@/lib/color-badges';
 
 interface Props {
     event: Event;
-}
-
-function statusColor(status: string) {
-    const map: Record<string, string> = {
-        approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        draft: 'bg-gray-100 text-gray-800',
-        rejected: 'bg-red-100 text-red-800',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
 }
 
 export default function AdminEventShow({ event }: Props) {
@@ -52,7 +41,7 @@ export default function AdminEventShow({ event }: Props) {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <Badge className={statusColor(event.status)}>{event.status}</Badge>
+                            <Badge className={eventStatusBadge(event.status)}>{event.status}</Badge>
                             <Badge variant="outline">{event.type}</Badge>
                         </div>
                         <h1 className="text-2xl font-bold">{event.title}</h1>
@@ -65,7 +54,7 @@ export default function AdminEventShow({ event }: Props) {
                             <>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button className="bg-green-600 hover:bg-green-700"><CheckCircle className="mr-2 h-4 w-4" />Approve</Button>
+                                        <Button><CheckCircle className="mr-2 h-4 w-4" />Approve</Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>

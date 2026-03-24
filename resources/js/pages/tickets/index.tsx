@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { BreadcrumbItem, Ticket, PaginatedResponse } from '@/types';
 import { Plus, LifeBuoy, MessageCircle } from 'lucide-react';
+import { ticketPriorityBadge, ticketStatusBadge } from '@/lib/color-badges';
 
 interface Filters { status: string; priority: string; }
 interface Props {
@@ -15,26 +16,6 @@ interface Props {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Support Tickets', href: '/tickets' }];
-
-function statusBadge(status: string) {
-    const map: Record<string, string> = {
-        open: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        closed: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-    };
-    return map[status] || 'bg-gray-100 text-gray-800';
-}
-
-function priorityBadge(priority: string) {
-    const map: Record<string, string> = {
-        low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-        medium: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-        urgent: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    };
-    return map[priority] || 'bg-gray-100 text-gray-800';
-}
 
 export default function TicketIndex({ tickets, filters }: Props) {
     return (
@@ -74,10 +55,10 @@ export default function TicketIndex({ tickets, filters }: Props) {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge className={statusBadge(ticket.status)}>{ticket.status.replace('_', ' ')}</Badge>
+                                                <Badge className={ticketStatusBadge(ticket.status)}>{ticket.status.replace('_', ' ')}</Badge>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge className={priorityBadge(ticket.priority)}>{ticket.priority}</Badge>
+                                                <Badge className={ticketPriorityBadge(ticket.priority)}>{ticket.priority}</Badge>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
