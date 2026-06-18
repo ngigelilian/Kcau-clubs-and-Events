@@ -75,6 +75,37 @@ export interface ClubMembership {
     user?: import('./auth').User;
 }
 
+export interface EventSession {
+    id: number;
+    event_id: number;
+    title: string;
+    description: string | null;
+    start_time: string;
+    end_time: string;
+    speaker_name: string | null;
+    speaker_bio: string | null;
+    speaker_avatar_url: string | null;
+    location: string | null;
+    sort_order: number;
+}
+
+export interface EventFeedback {
+    id: number;
+    event_id: number;
+    user_id: number;
+    rating: number;
+    comment: string | null;
+    would_recommend: boolean;
+    created_at: string;
+    user?: import('./auth').User;
+}
+
+export interface EventFeedbackStats {
+    avg_rating: number;
+    total_feedback: number;
+    would_recommend_percent: number;
+}
+
 export interface Event {
     id: number;
     title: string;
@@ -102,12 +133,18 @@ export interface Event {
     creator?: import('./auth').User;
     approver?: import('./auth').User;
     registrations?: EventRegistration[];
+    sessions?: EventSession[];
+    recent_feedback?: (EventFeedback & { user: { name: string; avatar: string } })[];
 
     // Computed
     available_spots?: number | null;
     is_registration_open?: boolean;
     formatted_fee?: string;
     cover_url?: string;
+    feedback_stats?: EventFeedbackStats | null;
+    waitlist_count?: number;
+    registered_count?: number;
+    user_feedback?: EventFeedback | null;
 }
 
 export interface EventRegistration {
@@ -121,6 +158,12 @@ export interface EventRegistration {
     cancelled_at: string | null;
     created_at: string;
     updated_at: string;
+
+    // Waitlist & check-in
+    check_in_token?: string | null;
+    is_waitlisted?: boolean;
+    waitlist_position?: number | null;
+    checked_in_at?: string | null;
 
     // Relationships
     event?: Event;

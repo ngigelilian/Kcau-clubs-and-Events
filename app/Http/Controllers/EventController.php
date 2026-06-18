@@ -12,9 +12,14 @@ use App\Http\Requests\Event\UpdateEventRequest;
 use App\Http\Requests\Payment\InitiateEventRegistrationRequest;
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\EventFeedback;
+use App\Models\EventRegistration;
 use App\Services\EventService;
 use App\Services\PaymentService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -86,16 +91,65 @@ class EventController extends Controller
         $event->is_registration_open = $event->isRegistrationOpen();
 
         $userRegistration = null;
+        $userFeedback = null;
         if ($user = $request->user()) {
             $userRegistration = $event->registrations()
                 ->where('user_id', $user->id)
                 ->where('status', '!=', RegistrationStatus::Cancelled)
                 ->first();
+            $userFeedback = $event->feedback()->where('user_id', $user->id)->first();
         }
 
+        $sessions = $event->sessions()->orderBy('sort_order')->orderBy('start_time')->get();
+
+        $feedbackQuery = $event->feedback();
+        $totalFeedback = $feedbackQuery->count();
+        $feedbackStats = [
+            'avg_rating'              => round($event->feedback()->avg('rating') ?? 0, 1),
+            'total_feedback'          => $totalFeedback,
+            'would_recommend_percent' => $totalFeedback > 0
+                ? round($event->feedback()->where('would_recommend', true)->count() / $totalFeedback * 100)
+                : 0,
+        ];
+
+        $recentFeedback = $event->feedback()->with('user:id,name,avatar')->latest()->take(10)->get();
+
+        $waitlistCount   = $event->registrations()->where('is_waitlisted', true)->count();
+        $registeredCount = $event->registrations()
+            ->where('status', '!=', 'cancelled')
+            ->where('is_waitlisted', false)
+            ->count();
+
+        // Related events: 4 upcoming approved events from same club (or school), excluding this one
+        $relatedQuery = Event::query()
+            ->upcoming()
+            ->where('id', '!=', $event->id)
+            ->with('club:id,name,slug')
+            ->withCount(['registrations as registered_count' => fn ($q) => $q->where('status', '!=', RegistrationStatus::Cancelled)])
+            ->orderBy('start_datetime')
+            ->limit(4);
+
+        if ($event->club_id) {
+            $relatedQuery->where('club_id', $event->club_id);
+        } else {
+            $relatedQuery->whereNull('club_id');
+        }
+
+        $relatedEvents = $relatedQuery->get()->map(function (Event $e) {
+            $e->cover_url = $e->getFirstMediaUrl('cover');
+            return $e;
+        });
+
         return Inertia::render('events/show', [
-            'event' => $event,
+            'event'          => $event,
             'userRegistration' => $userRegistration,
+            'sessions'       => $sessions,
+            'feedback_stats' => $feedbackStats,
+            'waitlist_count' => $waitlistCount,
+            'registered_count' => $registeredCount,
+            'user_feedback'  => $userFeedback,
+            'recent_feedback' => $recentFeedback,
+            'relatedEvents'  => $relatedEvents,
         ]);
     }
 
@@ -253,5 +307,112 @@ class EventController extends Controller
         $this->eventService->markAttendance($event, $userId);
 
         return back()->with('success', 'Attendance marked successfully.');
+    }
+
+    public function submitFeedback(Request $request, Event $event)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'rating'           => 'required|integer|between:1,5',
+            'comment'          => 'nullable|string|max:1000',
+            'would_recommend'  => 'boolean',
+        ]);
+
+        // Gate: user must have attended the event and the event must have ended
+        $hasAttended = $event->registrations()
+            ->where('user_id', $user->id)
+            ->where('status', RegistrationStatus::Attended)
+            ->exists();
+
+        if (! $hasAttended || $event->end_datetime->greaterThan(Carbon::now())) {
+            return back()->with('error', 'You can only leave feedback for events you attended after they have ended.');
+        }
+
+        EventFeedback::updateOrCreate(
+            ['event_id' => $event->id, 'user_id' => $user->id],
+            $request->only(['rating', 'comment', 'would_recommend'])
+        );
+
+        return back()->with('success', 'Thank you for your feedback!');
+    }
+
+    public function checkIn(Request $request, Event $event, string $token): JsonResponse
+    {
+        $reg = EventRegistration::where('check_in_token', $token)
+            ->where('event_id', $event->id)
+            ->with('user:id,name')
+            ->first();
+
+        if (! $reg) {
+            return response()->json(['success' => false, 'message' => 'Invalid QR code'], 404);
+        }
+
+        if ($reg->status === RegistrationStatus::Attended) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Already checked in',
+                'name'    => $reg->user->name,
+            ]);
+        }
+
+        $reg->update([
+            'status'        => RegistrationStatus::Attended,
+            'checked_in_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Checked in successfully!',
+            'name'    => $reg->user->name,
+        ]);
+    }
+
+    public function exportAttendees(Event $event)
+    {
+        $this->authorize('markAttendance', $event);
+
+        $registrations = $event->registrations()
+            ->with('user:id,name,email,student_id')
+            ->orderBy('registered_at')
+            ->get();
+
+        $rows = [];
+        $rows[] = implode(',', ['Name', 'Email', 'Student ID', 'Status', 'Waitlisted', 'Registered At', 'Checked In At']);
+
+        foreach ($registrations as $reg) {
+            $rows[] = implode(',', [
+                '"' . str_replace('"', '""', $reg->user->name ?? '') . '"',
+                '"' . str_replace('"', '""', $reg->user->email ?? '') . '"',
+                '"' . str_replace('"', '""', $reg->user->student_id ?? '') . '"',
+                $reg->status instanceof \BackedEnum ? $reg->status->value : $reg->status,
+                $reg->is_waitlisted ? 'Yes' : 'No',
+                $reg->registered_at?->toDateTimeString() ?? '',
+                $reg->checked_in_at?->toDateTimeString() ?? '',
+            ]);
+        }
+
+        $csv = implode("\n", $rows);
+
+        return response()->streamDownload(
+            function () use ($csv) { echo $csv; },
+            $event->slug . '-attendees.csv',
+            ['Content-Type' => 'text/csv']
+        );
+    }
+
+    public function cloneEvent(Event $event)
+    {
+        $this->authorize('update', $event);
+
+        $clone = $event->replicate(['slug', 'approved_by', 'approved_at']);
+        $clone->title          = $event->title . ' (Copy)';
+        $clone->status         = EventStatus::Draft;
+        $clone->slug           = $event->slug . '-copy-' . substr(md5(uniqid()), 0, 4);
+        $clone->start_datetime = null;
+        $clone->end_datetime   = null;
+        $clone->save();
+
+        return to_route('events.edit', $clone)->with('success', 'Event cloned as draft.');
     }
 }

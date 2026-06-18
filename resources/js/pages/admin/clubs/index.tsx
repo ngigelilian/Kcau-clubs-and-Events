@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/admin-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,7 +67,7 @@ export default function AdminClubIndex({ clubs, filters, statusCounts }: Props) 
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Clubs" />
 
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -179,6 +179,6 @@ export default function AdminClubIndex({ clubs, filters, statusCounts }: Props) 
 
                 <DataPagination data={clubs} />
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

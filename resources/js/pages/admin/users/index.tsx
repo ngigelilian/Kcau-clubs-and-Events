@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/admin-layout';
 import DataPagination from '@/components/shared/data-pagination';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +46,7 @@ export default function AdminUserIndex({ users, filters, roles }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Users" />
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
                 <div>
@@ -141,6 +141,6 @@ export default function AdminUserIndex({ users, filters, roles }: Props) {
                 </Card>
                 <DataPagination data={users} />
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

@@ -7,6 +7,7 @@ use App\Enums\RegistrationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class EventRegistration extends Model
 {
@@ -23,7 +24,26 @@ class EventRegistration extends Model
         'registered_at',
         'attended_at',
         'cancelled_at',
+        'check_in_token',
+        'is_waitlisted',
+        'waitlist_position',
+        'checked_in_at',
     ];
+
+    // -------------------------------------------------------------------------
+    // Boot
+    // -------------------------------------------------------------------------
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $registration) {
+            if (empty($registration->check_in_token)) {
+                $registration->check_in_token = Str::uuid()->toString();
+            }
+        });
+    }
 
     /**
      * @return array<string, string>
@@ -33,9 +53,11 @@ class EventRegistration extends Model
         return [
             'status' => RegistrationStatus::class,
             'payment_status' => PaymentStatusEnum::class,
-            'registered_at' => 'datetime',
-            'attended_at' => 'datetime',
-            'cancelled_at' => 'datetime',
+            'registered_at'  => 'datetime',
+            'attended_at'    => 'datetime',
+            'cancelled_at'   => 'datetime',
+            'is_waitlisted'  => 'boolean',
+            'checked_in_at'  => 'datetime',
         ];
     }
 
