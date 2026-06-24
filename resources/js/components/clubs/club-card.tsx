@@ -1,10 +1,10 @@
+import { Link } from '@inertiajs/react';
+import { Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import type { Club } from '@/types';
-import { Users } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import { show } from '@/routes/clubs';
 import { clubCategoryBadge } from '@/lib/color-badges';
+import { show } from '@/routes/clubs';
+import type { Club } from '@/types';
 
 interface ClubCardProps {
     club: Club;

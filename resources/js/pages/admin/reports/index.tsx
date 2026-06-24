@@ -1,12 +1,12 @@
 import { Head, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { DollarSign, Users, CalendarDays, LifeBuoy, ShoppingBag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AdminLayout from '@/layouts/admin-layout';
 import { badgeTone, eventStatusBadge } from '@/lib/color-badges';
 import type { BreadcrumbItem, Club, Event } from '@/types';
-import { BarChart2, DollarSign, Users, CalendarDays, LifeBuoy, ShoppingBag } from 'lucide-react';
 
 interface RevenueEntry { date: string; total: number }
 interface Props {

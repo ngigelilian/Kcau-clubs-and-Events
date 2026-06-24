@@ -1,19 +1,19 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
-import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { BreadcrumbItem, PaginatedResponse, Event, Club } from '@/types';
 import {
     CheckCircle2, X, Eye, MapPin, Calendar, Users,
     ArrowLeft, CheckCircle, Clock
 } from 'lucide-react';
 import { useState } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import AdminLayout from '@/layouts/admin-layout';
+import type { BreadcrumbItem, PaginatedResponse, Event, Club } from '@/types';
 
 interface PendingEvent extends Omit<Event, 'creator' | 'club'> {
     creator: { name: string; avatar?: string };

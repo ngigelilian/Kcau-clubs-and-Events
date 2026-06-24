@@ -1,16 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { Search, Eye, UserCheck, UserX } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
 import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import AdminLayout from '@/layouts/admin-layout';
 import type { BreadcrumbItem, PaginatedResponse } from '@/types';
-import { Search, Eye, UserCheck, UserX } from 'lucide-react';
-import { useState, useCallback, type FormEvent } from 'react';
 
 interface UserRow {
     id: number; name: string; email: string; student_id?: string;

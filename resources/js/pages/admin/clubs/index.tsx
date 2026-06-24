@@ -1,10 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { Eye, Search } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Table,
     TableBody,
@@ -13,11 +14,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminLayout from '@/layouts/admin-layout';
 import type { BreadcrumbItem, Club, PaginatedResponse } from '@/types';
-import { Eye, Search } from 'lucide-react';
-import * as adminClubs from '@/routes/admin';
-import { useState, useCallback, type FormEvent } from 'react';
 
 interface Filters {
     status: string;

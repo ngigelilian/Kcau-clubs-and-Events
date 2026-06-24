@@ -1,22 +1,22 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-    Dialog, DialogContent, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog';
-import type {
-    BreadcrumbItem, Event, EventRegistration, ClubMembership, Club, Announcement,
-} from '@/types';
-import type { User } from '@/types/auth';
 import {
     CalendarDays, MapPin, Clock, Users, Trophy, Star, Zap, TrendingUp,
     QrCode, ChevronRight, Bell, BookOpen, Sparkles, Calendar,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
+import type {
+    BreadcrumbItem, Event, EventRegistration, ClubMembership, Club, Announcement,
+} from '@/types';
+import type { User } from '@/types/auth';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 

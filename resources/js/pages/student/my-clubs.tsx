@@ -1,10 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { Users, CalendarDays, LogOut, Clock, ChevronRight, XCircle } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,9 +11,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
 import { clubCategoryBadge } from '@/lib/color-badges';
 import type { BreadcrumbItem, ClubMembership, Club } from '@/types';
-import { Users, CalendarDays, LogOut, Clock, ChevronRight, XCircle } from 'lucide-react';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -81,7 +81,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function MyClubs({ memberships, pendingMemberships }: Props) {
 
-    function handleLeaveClub(clubSlug: string, clubName: string) {
+    function handleLeaveClub(clubSlug: string) {
         router.delete(`/clubs/${clubSlug}/leave`);
     }
 
@@ -191,7 +191,7 @@ export default function MyClubs({ memberships, pendingMemberships }: Props) {
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                             <AlertDialogAction
-                                                                onClick={() => handleLeaveClub(club.slug, club.name)}
+                                                                onClick={() => handleLeaveClub(club.slug)}
                                                                 className="bg-destructive hover:bg-destructive/90">
                                                                 Leave Club
                                                             </AlertDialogAction>

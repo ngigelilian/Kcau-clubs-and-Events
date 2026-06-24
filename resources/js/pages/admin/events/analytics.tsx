@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
-import { Button } from '@/components/ui/button';
+import { Users, TrendingUp, Star, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { BreadcrumbItem, Event, EventFeedbackStats } from '@/types';
-import { Users, UserCheck, TrendingUp, Star, ArrowLeft } from 'lucide-react';
+import AdminLayout from '@/layouts/admin-layout';
 import { eventStatusBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem, Event, EventFeedbackStats } from '@/types';
 
 interface Props {
     event: Event & { cover_url?: string };

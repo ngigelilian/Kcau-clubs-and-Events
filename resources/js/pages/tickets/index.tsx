@@ -1,13 +1,13 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { BreadcrumbItem, Ticket, PaginatedResponse } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
 import { Plus, LifeBuoy, MessageCircle } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
 import { ticketPriorityBadge, ticketStatusBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem, Ticket, PaginatedResponse } from '@/types';
 
 interface Filters { status: string; priority: string; }
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Support Tickets', href: '/tickets' }];
 
-export default function TicketIndex({ tickets, filters }: Props) {
+export default function TicketIndex({ tickets }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Support Tickets" />

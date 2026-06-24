@@ -1,15 +1,15 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Link } from '@inertiajs/react';
+import { Plus, Search } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
 import ClubCard from '@/components/clubs/club-card';
 import DataPagination from '@/components/shared/data-pagination';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { BreadcrumbItem, Club, PaginatedResponse } from '@/types';
-import { Plus, Search } from 'lucide-react';
-import { useState, useCallback, type FormEvent } from 'react';
+import AppLayout from '@/layouts/app-layout';
 import { index, create } from '@/routes/clubs';
-import { Link } from '@inertiajs/react';
+import type { BreadcrumbItem, Club, PaginatedResponse } from '@/types';
 
 interface Category {
     value: string;

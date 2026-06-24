@@ -1,20 +1,19 @@
-import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import type { BreadcrumbItem, Event, EventRegistration, PaginatedResponse } from '@/types';
+import { Head, router } from '@inertiajs/react';
 import {
     Users, UserCheck, UserX, Clock, Search, Download,
     QrCode, AlertCircle, ArrowUp,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem, Event, EventRegistration, PaginatedResponse } from '@/types';
 
 interface AttendeeRegistration extends Omit<EventRegistration, 'user'> {
     user: { id: number; name: string; email: string; avatar: string; student_id: string };

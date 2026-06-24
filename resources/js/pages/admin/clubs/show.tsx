@@ -1,11 +1,9 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { Ban, Check, RefreshCw, Users, X } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -15,9 +13,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import AdminLayout from '@/layouts/admin-layout';
 import type { BreadcrumbItem, Club, ClubMembership } from '@/types';
-import { Ban, Check, RefreshCw, Users, X } from 'lucide-react';
-import { useState } from 'react';
 
 interface Props {
     club: Club & { memberships?: ClubMembership[] };

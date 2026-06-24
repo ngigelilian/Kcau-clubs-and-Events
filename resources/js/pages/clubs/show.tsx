@@ -1,11 +1,4 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import type { BreadcrumbItem, Club, ClubMembership, Event } from '@/types';
 import {
     Calendar,
     Crown,
@@ -18,7 +11,14 @@ import {
     MapPin,
     Package,
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
 import { index, edit, join, leave, members } from '@/routes/clubs';
+import type { BreadcrumbItem, Club, ClubMembership, Event } from '@/types';
 import type { User as AuthUser } from '@/types/auth';
 
 interface Props {

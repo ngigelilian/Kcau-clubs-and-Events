@@ -1,15 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { Plus, Search, Trash2 } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
+import AdminLayout from '@/layouts/admin-layout';
 import { announcementAudienceBadge } from '@/lib/color-badges';
 import type { Announcement, BreadcrumbItem, Club, PaginatedResponse } from '@/types';
-import { Plus, Search, Trash2 } from 'lucide-react';
-import { useState, useCallback, type FormEvent } from 'react';
 
 interface Props {
     announcements: PaginatedResponse<Announcement>;
@@ -22,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Announcements', href: '/admin/announcements' },
 ];
 
-export default function AdminAnnouncementsIndex({ announcements, filters, clubs }: Props) {
+export default function AdminAnnouncementsIndex({ announcements, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
 
     const handleSearch = useCallback((e: FormEvent) => {

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Bell, X, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -8,7 +8,7 @@ interface Notification {
     type: string;
     title: string;
     message: string;
-    data: Record<string, any>;
+    data: Record<string, unknown>;
     created_at: string;
 }
 
@@ -20,7 +20,6 @@ export default function NotificationBell({ pollInterval = 30000 }: NotificationB
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     const fetchNotifications = async () => {
         try {
@@ -43,6 +42,7 @@ export default function NotificationBell({ pollInterval = 30000 }: NotificationB
 
     // Fetch notifications on mount and set up polling
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch defers setState; intentional on-mount load
         fetchNotifications();
         const interval = setInterval(fetchNotifications, pollInterval);
         return () => clearInterval(interval);

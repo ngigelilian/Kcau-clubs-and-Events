@@ -1,10 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect, useRef } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { Club, Event } from '@/types/models';
-import type { User } from '@/types/auth';
 import {
     CalendarDays,
     MapPin,
@@ -28,6 +22,11 @@ import {
     TrendingUp,
     Zap,
 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import type { User } from '@/types/auth';
+import type { Club, Event } from '@/types/models';
 
 // ─── Settings Types ───────────────────────────────────────────────────────────
 

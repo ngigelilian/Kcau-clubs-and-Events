@@ -1,9 +1,8 @@
 import { Link } from '@inertiajs/react';
 import {
     LayoutGrid, Users, CalendarDays, ShoppingBag, Bell, LifeBuoy,
-    Bookmark, Trophy, type LucideIcon,
+    Bookmark, Trophy,
 } from 'lucide-react';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -15,9 +14,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
-import { dashboard } from '@/routes';
 
 const mainNavItems: NavItem[] = [
     { title: 'My Hub', href: { url: '/student/dashboard', method: 'get' }, icon: LayoutGrid },
@@ -30,8 +29,6 @@ const mainNavItems: NavItem[] = [
     { title: 'Announcements', href: { url: '/announcements', method: 'get' }, icon: Bell },
     { title: 'Support', href: { url: '/tickets', method: 'get' }, icon: LifeBuoy },
 ];
-
-const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     return (

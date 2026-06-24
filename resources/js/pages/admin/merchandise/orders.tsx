@@ -1,14 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import { ArrowLeft, Package } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminLayout from '@/layouts/admin-layout';
 import { badgeTone } from '@/lib/color-badges';
 import type { BreadcrumbItem, Order, PaginatedResponse } from '@/types';
-import { ArrowLeft, Package } from 'lucide-react';
 
 interface Props {
     orders: PaginatedResponse<Order & { orderable_name: string }>;

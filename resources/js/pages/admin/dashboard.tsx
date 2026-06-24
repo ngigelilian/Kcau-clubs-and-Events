@@ -1,16 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { badgeTone, eventStatusBadge, ticketPriorityBadge } from '@/lib/color-badges';
-import type { BreadcrumbItem } from '@/types';
 import {
     Users, Shield, CalendarDays, LifeBuoy, DollarSign,
     ShoppingBag, Clock, ArrowRight, TrendingUp, CheckCircle2,
     Bot, MessageCircle, ThumbsUp, Zap, Settings, Download,
 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminLayout from '@/layouts/admin-layout';
+import { badgeTone, ticketPriorityBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem } from '@/types';
 
 interface Stats {
     totalUsers: number; activeClubs: number; pendingClubs: number;

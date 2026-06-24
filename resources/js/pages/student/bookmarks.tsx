@@ -1,13 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import DataPagination from '@/components/shared/data-pagination';
-import type { BreadcrumbItem, PaginatedResponse, Event } from '@/types';
 import {
     CalendarDays, MapPin, Clock, BookmarkX, Trash2, Users,
 } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem, PaginatedResponse, Event } from '@/types';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 

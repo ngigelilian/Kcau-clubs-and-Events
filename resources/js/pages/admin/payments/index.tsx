@@ -1,16 +1,15 @@
 import { Head, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
-import { badgeTone } from '@/lib/color-badges';
-import type { BreadcrumbItem, Payment, PaginatedResponse } from '@/types';
 import { Search } from 'lucide-react';
 import { useState, useCallback, type FormEvent } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminLayout from '@/layouts/admin-layout';
+import { badgeTone } from '@/lib/color-badges';
+import type { BreadcrumbItem, Payment, PaginatedResponse } from '@/types';
 
 interface Props {
     payments: PaginatedResponse<Payment & { orderable_name: string }>;

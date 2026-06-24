@@ -1,12 +1,4 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import DataPagination from '@/components/shared/data-pagination';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import type { BreadcrumbItem, Event, PaginatedResponse } from '@/types';
-import { eventStatusBadge } from '@/lib/color-badges';
 import {
     CalendarDays,
     CalendarX,
@@ -18,6 +10,13 @@ import {
     Search,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
+import { eventStatusBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem, Event, PaginatedResponse } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -255,7 +254,7 @@ function EventListRow({ event }: { event: Event & { registered_count: number } }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function EventIndex({ events, filters, eventTypes }: Props) {
+export default function EventIndex({ events, filters }: Props) {
     const { auth } = usePage().props as { auth: { user: { permissions: string[] } | null } };
 
     const [search, setSearch] = useState(filters.search ?? '');

@@ -1,14 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Search, ShoppingBag } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
 import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Merchandise, PaginatedResponse } from '@/types';
-import { Search, ShoppingBag, Tag } from 'lucide-react';
-import { useState, useCallback, type FormEvent } from 'react';
 
 interface Club { id: number; name: string; }
 interface Filters { search: string; club: string; sort: string; }

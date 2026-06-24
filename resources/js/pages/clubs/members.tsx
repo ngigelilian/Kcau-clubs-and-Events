@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Check, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,10 +13,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
-import type { BreadcrumbItem, Club, ClubMembership, PaginatedResponse } from '@/types';
-import { Check, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
 import { index, show, members as membersRoute } from '@/routes/clubs';
+import type { BreadcrumbItem, Club, ClubMembership, PaginatedResponse } from '@/types';
 
 interface Props {
     club: Club;

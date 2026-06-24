@@ -1,12 +1,12 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import DataPagination from '@/components/shared/data-pagination';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import type { BreadcrumbItem, Announcement, PaginatedResponse } from '@/types';
 import { Bell, Plus, Megaphone } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import { announcementAudienceBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem, Announcement, PaginatedResponse } from '@/types';
 
 interface Props {
     announcements: PaginatedResponse<Announcement>;

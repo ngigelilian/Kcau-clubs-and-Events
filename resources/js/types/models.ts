@@ -1,3 +1,5 @@
+import type { User } from './auth';
+
 // =========================================================================
 // Enum Types — mirror PHP enums
 // =========================================================================
@@ -45,8 +47,8 @@ export interface Club {
     deleted_at: string | null;
 
     // Relationships (optional, loaded when needed)
-    creator?: import('./auth').User;
-    approver?: import('./auth').User;
+    creator?: User;
+    approver?: User;
     memberships?: ClubMembership[];
     events?: Event[];
     merchandise?: Merchandise[];
@@ -72,7 +74,7 @@ export interface ClubMembership {
 
     // Relationships
     club?: Club;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface EventSession {
@@ -97,7 +99,7 @@ export interface EventFeedback {
     comment: string | null;
     would_recommend: boolean;
     created_at: string;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface EventFeedbackStats {
@@ -130,8 +132,8 @@ export interface Event {
 
     // Relationships
     club?: Club;
-    creator?: import('./auth').User;
-    approver?: import('./auth').User;
+    creator?: User;
+    approver?: User;
     registrations?: EventRegistration[];
     sessions?: EventSession[];
     recent_feedback?: (EventFeedback & { user: { name: string; avatar: string } })[];
@@ -167,7 +169,7 @@ export interface EventRegistration {
 
     // Relationships
     event?: Event;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface Merchandise {
@@ -206,7 +208,7 @@ export interface Order {
     updated_at: string;
 
     // Relationships
-    user?: import('./auth').User;
+    user?: User;
     orderable?: Event | Merchandise;
     payments?: Payment[];
 
@@ -232,7 +234,7 @@ export interface Payment {
 
     // Relationships
     order?: Order;
-    user?: import('./auth').User;
+    user?: User;
 
     // Computed
     formatted_amount?: string;
@@ -253,8 +255,8 @@ export interface Announcement {
 
     // Relationships
     club?: Club;
-    author?: import('./auth').User;
-    created_by_user?: import('./auth').User;
+    author?: User;
+    created_by_user?: User;
 }
 
 export interface Ticket {
@@ -272,9 +274,9 @@ export interface Ticket {
     updated_at: string;
 
     // Relationships
-    user?: import('./auth').User;
-    assignee?: import('./auth').User;
-    assigned_to_user?: import('./auth').User;
+    user?: User;
+    assignee?: User;
+    assigned_to_user?: User;
     replies?: TicketReply[];
 
     // Computed
@@ -293,7 +295,7 @@ export interface TicketReply {
 
     // Relationships
     ticket?: Ticket;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface Report {
@@ -307,7 +309,7 @@ export interface Report {
     updated_at: string;
 
     // Relationships
-    generator?: import('./auth').User;
+    generator?: User;
 }
 
 // =========================================================================
@@ -348,7 +350,7 @@ export interface FlashMessages {
 export interface SharedPageProps {
     name: string;
     auth: {
-        user: import('./auth').User | null;
+        user: User | null;
     };
     sidebarOpen: boolean;
     flash: FlashMessages;

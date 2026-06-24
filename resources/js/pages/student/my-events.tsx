@@ -1,22 +1,22 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import {
-    Dialog, DialogContent, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog';
-import DataPagination from '@/components/shared/data-pagination';
-import type {
-    BreadcrumbItem, PaginatedResponse, EventRegistration, Event,
-} from '@/types';
-import type { User } from '@/types/auth';
 import {
     CalendarDays, CalendarCheck, Clock, MapPin, QrCode,
     CalendarX, Star, Download, Copy, X, RotateCcw,
 } from 'lucide-react';
 import { useState } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+    Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
+import type {
+    BreadcrumbItem, PaginatedResponse, EventRegistration, Event,
+} from '@/types';
+import type { User } from '@/types/auth';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -25,9 +25,6 @@ function formatDate(d: string) {
 }
 function formatTime(d: string) {
     return new Date(d).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
-}
-function initials(name: string) {
-    return name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
 }
 
 type ExtendedRegistration = EventRegistration & {
@@ -141,8 +138,8 @@ function StatusRibbon({ reg }: { reg: ExtendedRegistration }) {
 // ─── Registration Card ────────────────────────────────────────────────────────
 
 function RegistrationCard({
-    reg, tab, onQr, user,
-}: { reg: ExtendedRegistration; tab: string; onQr: (token: string, title: string) => void; user: User }) {
+    reg, tab, onQr,
+}: { reg: ExtendedRegistration; tab: string; onQr: (token: string, title: string) => void }) {
     const ev = reg.event;
     const isUpcoming = tab === 'upcoming';
     const isPast = tab === 'past';

@@ -4,13 +4,13 @@ import {
     PackageOpen, CreditCard, ShoppingBag, BarChart2, UserCog,
     Bot, Settings2, ExternalLink,
 } from 'lucide-react';
+import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar, SidebarContent, SidebarFooter, SidebarHeader,
     SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup,
     SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { NavMain } from '@/components/nav-main';
 import type { NavItem } from '@/types';
 
 const adminNavItems: NavItem[] = [
