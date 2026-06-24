@@ -1,3 +1,5 @@
+import type { User } from './auth';
+
 // =========================================================================
 // Enum Types — mirror PHP enums
 // =========================================================================
@@ -45,8 +47,8 @@ export interface Club {
     deleted_at: string | null;
 
     // Relationships (optional, loaded when needed)
-    creator?: import('./auth').User;
-    approver?: import('./auth').User;
+    creator?: User;
+    approver?: User;
     memberships?: ClubMembership[];
     events?: Event[];
     merchandise?: Merchandise[];
@@ -72,7 +74,38 @@ export interface ClubMembership {
 
     // Relationships
     club?: Club;
-    user?: import('./auth').User;
+    user?: User;
+}
+
+export interface EventSession {
+    id: number;
+    event_id: number;
+    title: string;
+    description: string | null;
+    start_time: string;
+    end_time: string;
+    speaker_name: string | null;
+    speaker_bio: string | null;
+    speaker_avatar_url: string | null;
+    location: string | null;
+    sort_order: number;
+}
+
+export interface EventFeedback {
+    id: number;
+    event_id: number;
+    user_id: number;
+    rating: number;
+    comment: string | null;
+    would_recommend: boolean;
+    created_at: string;
+    user?: User;
+}
+
+export interface EventFeedbackStats {
+    avg_rating: number;
+    total_feedback: number;
+    would_recommend_percent: number;
 }
 
 export interface Event {
@@ -99,15 +132,21 @@ export interface Event {
 
     // Relationships
     club?: Club;
-    creator?: import('./auth').User;
-    approver?: import('./auth').User;
+    creator?: User;
+    approver?: User;
     registrations?: EventRegistration[];
+    sessions?: EventSession[];
+    recent_feedback?: (EventFeedback & { user: { name: string; avatar: string } })[];
 
     // Computed
     available_spots?: number | null;
     is_registration_open?: boolean;
     formatted_fee?: string;
     cover_url?: string;
+    feedback_stats?: EventFeedbackStats | null;
+    waitlist_count?: number;
+    registered_count?: number;
+    user_feedback?: EventFeedback | null;
 }
 
 export interface EventRegistration {
@@ -122,9 +161,15 @@ export interface EventRegistration {
     created_at: string;
     updated_at: string;
 
+    // Waitlist & check-in
+    check_in_token?: string | null;
+    is_waitlisted?: boolean;
+    waitlist_position?: number | null;
+    checked_in_at?: string | null;
+
     // Relationships
     event?: Event;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface Merchandise {
@@ -163,7 +208,7 @@ export interface Order {
     updated_at: string;
 
     // Relationships
-    user?: import('./auth').User;
+    user?: User;
     orderable?: Event | Merchandise;
     payments?: Payment[];
 
@@ -189,7 +234,7 @@ export interface Payment {
 
     // Relationships
     order?: Order;
-    user?: import('./auth').User;
+    user?: User;
 
     // Computed
     formatted_amount?: string;
@@ -210,8 +255,8 @@ export interface Announcement {
 
     // Relationships
     club?: Club;
-    author?: import('./auth').User;
-    created_by_user?: import('./auth').User;
+    author?: User;
+    created_by_user?: User;
 }
 
 export interface Ticket {
@@ -229,9 +274,9 @@ export interface Ticket {
     updated_at: string;
 
     // Relationships
-    user?: import('./auth').User;
-    assignee?: import('./auth').User;
-    assigned_to_user?: import('./auth').User;
+    user?: User;
+    assignee?: User;
+    assigned_to_user?: User;
     replies?: TicketReply[];
 
     // Computed
@@ -250,7 +295,7 @@ export interface TicketReply {
 
     // Relationships
     ticket?: Ticket;
-    user?: import('./auth').User;
+    user?: User;
 }
 
 export interface Report {
@@ -264,7 +309,7 @@ export interface Report {
     updated_at: string;
 
     // Relationships
-    generator?: import('./auth').User;
+    generator?: User;
 }
 
 // =========================================================================
@@ -305,7 +350,7 @@ export interface FlashMessages {
 export interface SharedPageProps {
     name: string;
     auth: {
-        user: import('./auth').User | null;
+        user: User | null;
     };
     sidebarOpen: boolean;
     flash: FlashMessages;

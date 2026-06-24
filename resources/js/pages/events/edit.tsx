@@ -1,14 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Event, EventType as EventTypeValue } from '@/types';
-import { type FormEvent } from 'react';
 
 interface Club { id: number; name: string; }
 interface EventTypeOption { value: string; label: string; }
@@ -125,7 +125,7 @@ export default function EventEdit({ event, clubs, eventTypes, canCreateSchoolEve
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="cover">Cover Image</Label>
-                                {(event as any).cover_url && <img src={(event as any).cover_url} alt="Current cover" className="h-32 w-full rounded-lg object-cover" />}
+                                {event.cover_url && <img src={event.cover_url} alt="Current cover" className="h-32 w-full rounded-lg object-cover" />}
                                 <Input id="cover" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('cover', e.target.files?.[0] || null)} />
                             </div>
                         </CardContent>

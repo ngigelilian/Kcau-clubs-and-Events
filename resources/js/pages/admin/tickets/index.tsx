@@ -1,15 +1,15 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import DataPagination from '@/components/shared/data-pagination';
-import type { BreadcrumbItem, Ticket, PaginatedResponse, User } from '@/types';
+import { Head, router } from '@inertiajs/react';
 import { AlertCircle, Clock, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AdminLayout from '@/layouts/admin-layout';
+import type { BreadcrumbItem, Ticket, PaginatedResponse, User } from '@/types';
 
 interface Props {
     tickets: PaginatedResponse<Ticket>;
@@ -102,7 +102,7 @@ export default function AdminTicketsIndex({
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Support Ticket Queue" />
             <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
                 <div>
@@ -313,6 +313,6 @@ export default function AdminTicketsIndex({
                 )}
                 <DataPagination data={tickets} />
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

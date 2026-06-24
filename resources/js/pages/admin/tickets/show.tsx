@@ -1,14 +1,14 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { AlertCircle, Send, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertCircle, Clock, Send, Loader2 } from 'lucide-react';
-import type { BreadcrumbItem, Ticket, User } from '@/types';
+import { Textarea } from '@/components/ui/textarea';
+import AdminLayout from '@/layouts/admin-layout';
 import { badgeTone, ticketPriorityBadge, ticketStatusBadge } from '@/lib/color-badges';
+import type { BreadcrumbItem, Ticket, User } from '@/types';
 
 interface Props {
     ticket: Ticket;
@@ -16,18 +16,16 @@ interface Props {
     isOverdue: boolean;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin', href: '/admin' },
-    { title: 'Tickets', href: '/admin/tickets' },
-    { title: `#${0}`, href: '' }, // Will be set dynamically
-];
-
 export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props) {
     const [replyMessage, setReplyMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedAssignee, setSelectedAssignee] = useState(ticket.assigned_to?.toString() || '');
 
-    breadcrumbs[2].title = `#${ticket.id}`;
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Admin', href: '/admin' },
+        { title: 'Tickets', href: '/admin/tickets' },
+        { title: `#${ticket.id}`, href: '' },
+    ];
 
     const handleReply = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,7 +58,7 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title={`Ticket #${ticket.id}`} />
             <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
                 {/* Header with Status and Actions */}
@@ -296,6 +294,6 @@ export default function AdminTicketShow({ ticket, adminUsers, isOverdue }: Props
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

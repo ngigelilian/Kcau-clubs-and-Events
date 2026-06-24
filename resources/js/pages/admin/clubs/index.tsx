@@ -1,10 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Eye, Search } from 'lucide-react';
+import { useState, useCallback, type FormEvent } from 'react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Table,
     TableBody,
@@ -13,11 +14,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import DataPagination from '@/components/shared/data-pagination';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminLayout from '@/layouts/admin-layout';
 import type { BreadcrumbItem, Club, PaginatedResponse } from '@/types';
-import { Eye, Search } from 'lucide-react';
-import * as adminClubs from '@/routes/admin';
-import { useState, useCallback, type FormEvent } from 'react';
 
 interface Filters {
     status: string;
@@ -67,7 +66,7 @@ export default function AdminClubIndex({ clubs, filters, statusCounts }: Props) 
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Clubs" />
 
             <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -179,6 +178,6 @@ export default function AdminClubIndex({ clubs, filters, statusCounts }: Props) 
 
                 <DataPagination data={clubs} />
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

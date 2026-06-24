@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Order, Payment } from '@/types';
 
 interface PaginatedOrders {

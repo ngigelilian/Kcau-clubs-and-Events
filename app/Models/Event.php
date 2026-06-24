@@ -125,6 +125,24 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Sessions for this event.
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(EventSession::class)
+            ->orderBy('sort_order')
+            ->orderBy('start_time');
+    }
+
+    /**
+     * Feedback submitted for this event.
+     */
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(EventFeedback::class);
+    }
+
+    /**
      * Orders for this event (polymorphic).
      */
     public function orders(): MorphMany

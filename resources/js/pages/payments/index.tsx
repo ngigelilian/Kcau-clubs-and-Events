@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Payment } from '@/types';
-import { Download } from 'lucide-react';
 
 interface PaginatedPayments {
     data: (Payment & { orderable_name?: string })[];

@@ -1,5 +1,5 @@
-import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { ExternalLink, LogOut, Settings, Shield } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,9 +8,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import type { User } from '@/types';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
+import type { User } from '@/types';
 
 type Props = {
     user: User;
@@ -18,6 +18,8 @@ type Props = {
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
+    const { auth } = usePage().props as { auth: { user: { roles?: string[] } | null } };
+    const isAdmin = auth.user?.roles?.includes('admin') || auth.user?.roles?.includes('super-admin');
 
     const handleLogout = () => {
         cleanup();
@@ -45,6 +47,18 @@ export function UserMenuContent({ user }: Props) {
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
+            {isAdmin && (
+                <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href="/admin" className="flex items-center gap-2 text-[#182b5c] font-medium cursor-pointer">
+                            <Shield className="h-4 w-4 text-[#d0b216]" />
+                            Admin Panel
+                            <ExternalLink className="h-3 w-3 ml-auto opacity-60" />
+                        </Link>
+                    </DropdownMenuItem>
+                </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                 <Link

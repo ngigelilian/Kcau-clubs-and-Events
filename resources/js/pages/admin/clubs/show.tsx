@@ -1,11 +1,9 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Ban, Check, RefreshCw, Users, X } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -15,9 +13,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import AdminLayout from '@/layouts/admin-layout';
 import type { BreadcrumbItem, Club, ClubMembership } from '@/types';
-import { Ban, Check, RefreshCw, Users, X } from 'lucide-react';
-import { useState } from 'react';
 
 interface Props {
     club: Club & { memberships?: ClubMembership[] };
@@ -68,7 +68,7 @@ export default function AdminClubShow({ club }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title={`Review: ${club.name}`} />
 
             <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -289,6 +289,6 @@ export default function AdminClubShow({ club }: Props) {
                     </Card>
                 )}
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

@@ -1,15 +1,15 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { BreadcrumbItem, Club, Event, Order, Announcement, Payment } from '@/types';
+import { Head, Link } from '@inertiajs/react';
 import {
     Users, CalendarDays, ShoppingBag, Bell, LifeBuoy, ArrowRight,
     Clock, DollarSign, Shield
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import { badgeTone } from '@/lib/color-badges';
+import type { BreadcrumbItem, Club, Event, Order, Announcement, Payment } from '@/types';
 
 interface StudentProps {
     isAdmin: false;
@@ -38,7 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' 
 function formatDate(d: string) { return new Date(d).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' }); }
 function formatTime(d: string) { return new Date(d).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' }); }
 
-function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recentOrders, announcements }: AdminProps) {
+function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recentOrders }: AdminProps) {
     const statCards = [
         { label: 'Total Users', value: stats.totalUsers, icon: Users, color: badgeTone.info },
         { label: 'Active Clubs', value: stats.totalClubs, icon: Shield, color: badgeTone.accent },
