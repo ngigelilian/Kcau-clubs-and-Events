@@ -33,6 +33,8 @@ class UpdateEventRequest extends FormRequest
             'is_paid' => ['boolean'],
             'fee_amount' => ['required_if:is_paid,true', 'nullable', 'integer', 'min:100'],
             'cover' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'campus' => ['nullable', 'string', 'in:Main campus,Town campus,Kitengela campus,Western campus'],
+            'qr_token' => ['nullable', 'string', 'max:255'],
             'submit_for_approval' => ['sometimes', 'boolean'],
         ];
     }

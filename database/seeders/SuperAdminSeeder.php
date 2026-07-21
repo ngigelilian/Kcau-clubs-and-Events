@@ -13,11 +13,11 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $superAdmin = User::firstOrCreate(
+        $superAdmin = User::updateOrCreate(
             ['email' => 'admin@kcau.ac.ke'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]
@@ -26,11 +26,11 @@ class SuperAdminSeeder extends Seeder
         $superAdmin->assignRole('super-admin');
 
         // Create a secondary admin for testing
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin2@kcau.ac.ke'],
             [
                 'name' => 'Administrator',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]

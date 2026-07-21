@@ -1,17 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
 import { Download } from 'lucide-react';
+import DataPagination from '@/components/shared/data-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Payment } from '@/types';
-
-interface PaginatedPayments {
-    data: (Payment & { orderable_name?: string })[];
-}
+import type { BreadcrumbItem, Payment, PaginatedResponse } from '@/types';
 
 interface Props {
-    payments: PaginatedPayments;
+    payments: PaginatedResponse<Payment & { orderable_name?: string }>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -72,6 +69,8 @@ export default function PaymentsIndex({ payments }: Props) {
                         </Card>
                     )}
                 </div>
+
+                <DataPagination data={payments} />
             </div>
         </AppLayout>
     );

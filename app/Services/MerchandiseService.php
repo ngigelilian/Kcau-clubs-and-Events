@@ -15,13 +15,20 @@ class MerchandiseService
     public function createItem(Club $club, array $data): Merchandise
     {
         return DB::transaction(function () use ($club, $data) {
+            $creator = auth()->user();
+
+            $initialStatus = MerchandiseStatus::Available;
+            if ($creator && ! $creator->hasRole(['admin', 'super-admin'])) {
+                $initialStatus = MerchandiseStatus::Pending;
+            }
+
             $item = Merchandise::create([
                 'club_id' => $club->id,
                 'name' => $data['name'],
                 'description' => $data['description'],
                 'price' => $data['price'],
                 'stock_quantity' => $data['stock_quantity'],
-                'status' => MerchandiseStatus::Available,
+                'status' => $initialStatus,
             ]);
 
             if (isset($data['images'])) {

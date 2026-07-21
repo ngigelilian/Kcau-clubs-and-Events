@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Payment;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -88,26 +89,30 @@ class MpesaService
             throw new RuntimeException('M-Pesa consumer credentials are not configured.');
         }
 
-        try {
-            $response = Http::baseUrl($this->baseUrl())
-                ->acceptJson()
-                ->withBasicAuth($consumerKey, $consumerSecret)
-                ->timeout(15)
-                ->get('/oauth/v1/generate', ['grant_type' => 'client_credentials']);
-        } catch (ConnectionException $exception) {
-            throw new RuntimeException('Unable to connect to the M-Pesa gateway.', previous: $exception);
-        }
+        $cacheKey = 'mpesa_access_token_' . md5($consumerKey);
 
-        if ($response->failed()) {
-            throw new RuntimeException('Unable to obtain an M-Pesa access token.');
-        }
+        return Cache::remember($cacheKey, 3500, function () use ($consumerKey, $consumerSecret): string {
+            try {
+                $response = Http::baseUrl($this->baseUrl())
+                    ->acceptJson()
+                    ->withBasicAuth($consumerKey, $consumerSecret)
+                    ->timeout(15)
+                    ->get('/oauth/v1/generate', ['grant_type' => 'client_credentials']);
+            } catch (ConnectionException $exception) {
+                throw new RuntimeException('Unable to connect to the M-Pesa gateway.', previous: $exception);
+            }
 
-        $token = $response->json('access_token');
-        if (! is_string($token) || $token === '') {
-            throw new RuntimeException('M-Pesa access token response was invalid.');
-        }
+            if ($response->failed()) {
+                throw new RuntimeException('Unable to obtain an M-Pesa access token.');
+            }
 
-        return $token;
+            $token = $response->json('access_token');
+            if (! is_string($token) || $token === '') {
+                throw new RuntimeException('M-Pesa access token response was invalid.');
+            }
+
+            return $token;
+        });
     }
 
     private function baseUrl(): string

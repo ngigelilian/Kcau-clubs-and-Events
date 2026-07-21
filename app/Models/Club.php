@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ClubCategory;
 use App\Enums\ClubMembershipType;
 use App\Enums\ClubStatus;
+use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,9 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Relationships resolved at runtime via autoloader — explicitly import used models
+// to avoid UnexpectedValueException on first resolution
 
 class Club extends Model implements HasMedia
 {
@@ -173,8 +177,8 @@ class Club extends Model implements HasMedia
     public function scopeSearch($query, string $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('name', 'ILIKE', "%{$search}%")
-              ->orWhere('description', 'ILIKE', "%{$search}%");
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('description', 'LIKE', "%{$search}%");
         });
     }
 

@@ -169,6 +169,8 @@ export default function EventShow({ event, userRegistration, relatedEvents }: Pr
     // M-Pesa dialog
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState(user?.phone ?? '');
+    const [stkProcessing, setStkProcessing] = useState(false);
+    const [stkError, setStkError] = useState<string | null>(null);
 
     // Share dialog
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -195,10 +197,25 @@ export default function EventShow({ event, userRegistration, relatedEvents }: Pr
 
     const handlePaidRegistration = (e: FormEvent) => {
         e.preventDefault();
+        setStkError(null);
+        setStkProcessing(true);
         router.post(
             `/events/${event.slug}/register`,
             { phone_number: phoneNumber || undefined },
-            { onSuccess: () => setPhoneDialogOpen(false) },
+            {
+                onSuccess: (page) => {
+                    const flash = (page.props as { flash?: { error?: string; success?: string } }).flash;
+                    if (flash?.error) {
+                        setStkError(flash.error);
+                    } else {
+                        setPhoneDialogOpen(false);
+                    }
+                },
+                onError: (errors) => {
+                    setStkError(Object.values(errors)[0] ?? 'Something went wrong. Please try again.');
+                },
+                onFinish: () => setStkProcessing(false),
+            },
         );
     };
 
@@ -1149,7 +1166,7 @@ export default function EventShow({ event, userRegistration, relatedEvents }: Pr
             {/* ============================================================
                 M-PESA DIALOG
             ============================================================ */}
-            <Dialog open={phoneDialogOpen} onOpenChange={setPhoneDialogOpen}>
+            <Dialog open={phoneDialogOpen} onOpenChange={(open) => { setPhoneDialogOpen(open); if (!open) setStkError(null); }}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Enter M-Pesa Phone Number</DialogTitle>
@@ -1167,12 +1184,17 @@ export default function EventShow({ event, userRegistration, relatedEvents }: Pr
                                 placeholder="2547XXXXXXXX or 07XXXXXXXX"
                             />
                         </div>
+                        {stkError && (
+                            <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
+                                {stkError}
+                            </p>
+                        )}
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)}>
+                            <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)} disabled={stkProcessing}>
                                 Cancel
                             </Button>
-                            <Button type="submit" className="bg-[#182b5c] text-white hover:bg-[#1e3570]">
-                                Send STK Push
+                            <Button type="submit" className="bg-[#182b5c] text-white hover:bg-[#1e3570]" disabled={stkProcessing}>
+                                {stkProcessing ? 'Sending…' : 'Send STK Push'}
                             </Button>
                         </DialogFooter>
                     </form>

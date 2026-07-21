@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MultiImageUpload } from '@/components/ui/image-upload';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -61,10 +62,21 @@ export default function MerchandiseCreate({ club }: Props) {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="price">Price (cents) *</Label>
-                                    <Input id="price" type="number" value={data.price} onChange={(e) => setData('price', e.target.value)} placeholder="e.g. 150000 = KES 1,500" />
-                                    {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
+                                <Label>Price (KES) *</Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">KES</span>
+                                    <Input
+                                        id="price"
+                                        type="number"
+                                        className="pl-12"
+                                        value={data.price === '' ? '' : Number(data.price) / 100}
+                                        onChange={(e) => setData('price', Math.round(parseFloat(e.target.value || '0') * 100))}
+                                        placeholder="e.g. 1500"
+                                    />
                                 </div>
+                                <p className="text-xs text-muted-foreground">Enter the price in Kenya Shillings.</p>
+                                {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
+                            </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="stock_quantity">Stock Quantity *</Label>
                                     <Input id="stock_quantity" type="number" value={data.stock_quantity} onChange={(e) => setData('stock_quantity', e.target.value)} placeholder="e.g. 50" />
@@ -72,11 +84,12 @@ export default function MerchandiseCreate({ club }: Props) {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="images">Product Images</Label>
-                                <Input id="images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setData('images', Array.from(e.target.files || []))} />
-                                {errors.images && <p className="text-sm text-destructive">{errors.images}</p>}
-                            </div>
+                            <MultiImageUpload
+                                id="images"
+                                label="Product Images"
+                                onChange={(files) => setData('images', files)}
+                                error={errors.images}
+                            />
                         </CardContent>
                     </Card>
 

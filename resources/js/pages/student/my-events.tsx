@@ -326,7 +326,6 @@ export default function MyEvents({ registrations, tab, counts }: Props) {
                                     reg={reg}
                                     tab={tab}
                                     onQr={(token, title) => setQrState({ token, title })}
-                                    user={user}
                                 />
                             ))}
                         </div>

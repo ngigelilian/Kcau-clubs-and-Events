@@ -80,6 +80,7 @@ export default function AdminMerchandiseIndex({ merchandise, filters, statusCoun
                                     <TableHead>Orders</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Added</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -104,6 +105,26 @@ export default function AdminMerchandiseIndex({ merchandise, filters, statusCoun
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
                                             {new Date(m.created_at).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            {m.status === 'pending' ? (
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" variant="ghost" onClick={() => {
+                                                        if (!confirm('Approve this item?')) return;
+                                                        router.post(`/admin/merchandise/${m.id}/approve`);
+                                                    }}>
+                                                        Approve
+                                                    </Button>
+                                                    <Button size="sm" variant="destructive" onClick={() => {
+                                                        if (!confirm('Reject this item?')) return;
+                                                        router.post(`/admin/merchandise/${m.id}/reject`);
+                                                    }}>
+                                                        Reject
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground">—</span>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}

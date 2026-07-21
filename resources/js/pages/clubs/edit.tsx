@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SingleImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -193,41 +194,25 @@ export default function ClubEdit({ club, categories }: Props) {
                                 </div>
                             )}
 
-                            {/* Current Logo */}
-                            <div className="space-y-2">
-                                <Label htmlFor="logo">Club Logo</Label>
-                                {club.logo_url && (
-                                    <div className="mb-2">
-                                        <img src={club.logo_url} alt="Current logo" className="h-16 w-16 rounded-lg object-cover" />
-                                        <p className="mt-1 text-xs text-muted-foreground">Current logo — upload a new one to replace.</p>
-                                    </div>
-                                )}
-                                <Input
-                                    id="logo"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={(e) => setData('logo', e.target.files?.[0] ?? null)}
-                                />
-                                {errors.logo && <p className="text-sm text-destructive">{errors.logo}</p>}
-                            </div>
+                            {/* Logo Upload */}
+                            <SingleImageUpload
+                                id="logo"
+                                label="Club Logo"
+                                hint="JPEG, PNG, or WebP · max 5 MB · recommended 400×400 px"
+                                currentUrl={club.logo_url}
+                                onChange={(file) => setData('logo', file)}
+                                error={errors.logo}
+                            />
 
-                            {/* Current Banner */}
-                            <div className="space-y-2">
-                                <Label htmlFor="banner">Banner Image</Label>
-                                {club.banner_url && (
-                                    <div className="mb-2">
-                                        <img src={club.banner_url} alt="Current banner" className="h-24 w-full rounded-lg object-cover" />
-                                        <p className="mt-1 text-xs text-muted-foreground">Current banner — upload a new one to replace.</p>
-                                    </div>
-                                )}
-                                <Input
-                                    id="banner"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={(e) => setData('banner', e.target.files?.[0] ?? null)}
-                                />
-                                {errors.banner && <p className="text-sm text-destructive">{errors.banner}</p>}
-                            </div>
+                            {/* Banner Upload */}
+                            <SingleImageUpload
+                                id="banner"
+                                label="Banner Image"
+                                hint="JPEG, PNG, or WebP · max 5 MB · recommended 1200×400 px"
+                                currentUrl={club.banner_url}
+                                onChange={(file) => setData('banner', file)}
+                                error={errors.banner}
+                            />
 
                             {/* Submit */}
                             <div className="flex justify-end gap-3">

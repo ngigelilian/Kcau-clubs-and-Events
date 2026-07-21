@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum MerchandiseStatus: string
 {
+    case Pending = 'pending';
     case Available = 'available';
     case OutOfStock = 'out_of_stock';
     case Discontinued = 'discontinued';
@@ -14,6 +15,7 @@ enum MerchandiseStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::Pending => 'Pending Approval',
             self::Available => 'Available',
             self::OutOfStock => 'Out of Stock',
             self::Discontinued => 'Discontinued',
@@ -26,6 +28,7 @@ enum MerchandiseStatus: string
     public function color(): string
     {
         return match ($this) {
+            self::Pending => 'amber',
             self::Available => 'green',
             self::OutOfStock => 'yellow',
             self::Discontinued => 'red',

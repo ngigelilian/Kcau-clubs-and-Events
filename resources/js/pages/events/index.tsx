@@ -128,9 +128,8 @@ function EventGridCard({ event }: { event: Event & { registered_count: number } 
                 </span>
                 {/* Price badge */}
                 <span
-                    className={`absolute top-2 right-2 rounded px-2 py-0.5 text-xs font-bold ${
-                        isFree ? 'bg-white/80 text-gray-800' : 'bg-[#d0b216]/90 text-[#182b5c]'
-                    }`}
+                    className={`absolute top-2 right-2 rounded px-2 py-0.5 text-xs font-bold ${isFree ? 'bg-white/80 text-gray-800' : 'bg-[#d0b216]/90 text-[#182b5c]'
+                        }`}
                 >
                     {isFree ? 'Free' : event.formatted_fee}
                 </span>
@@ -236,9 +235,8 @@ function EventListRow({ event }: { event: Event & { registered_count: number } }
                     {event.status}
                 </span>
                 <span
-                    className={`rounded px-2 py-0.5 text-xs font-bold ${
-                        isFree ? 'bg-muted text-muted-foreground' : 'bg-[#d0b216]/20 text-[#182b5c]'
-                    }`}
+                    className={`rounded px-2 py-0.5 text-xs font-bold ${isFree ? 'bg-muted text-muted-foreground' : 'bg-[#d0b216]/20 text-[#182b5c]'
+                        }`}
                 >
                     {isFree ? 'Free' : event.formatted_fee}
                 </span>
@@ -255,7 +253,7 @@ function EventListRow({ event }: { event: Event & { registered_count: number } }
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function EventIndex({ events, filters }: Props) {
-    const { auth } = usePage().props as { auth: { user: { permissions: string[] } | null } };
+    const { auth, can } = usePage().props as { auth: { user: { permissions: string[] } | null }, can?: { createEvent?: boolean } };
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [view, setView] = useState<ViewMode>(() => {
@@ -307,8 +305,8 @@ export default function EventIndex({ events, filters }: Props) {
         filters.category
             ? filters.category
             : filters.type
-            ? filters.type
-            : 'all';
+                ? filters.type
+                : 'all';
 
     const showFeatured =
         (filters.filter === 'upcoming' || !filters.filter) &&
@@ -329,7 +327,7 @@ export default function EventIndex({ events, filters }: Props) {
                         <h1 className="text-3xl font-bold tracking-tight">Events</h1>
                         <p className="text-muted-foreground">Discover what's happening at KCA University</p>
                     </div>
-                    {auth.user && (
+                    {can?.createEvent && (
                         <Link href="/events/create">
                             <Button className="bg-[#182b5c] hover:bg-[#0f1e42] text-white">
                                 <Plus className="mr-2 h-4 w-4" />
@@ -347,11 +345,10 @@ export default function EventIndex({ events, filters }: Props) {
                             <button
                                 key={pill.value}
                                 onClick={() => handleCategory(pill.value)}
-                                className={`shrink-0 snap-start rounded-full border px-4 py-1.5 text-sm font-medium cursor-pointer transition ${
-                                    active
+                                className={`shrink-0 snap-start rounded-full border px-4 py-1.5 text-sm font-medium cursor-pointer transition ${active
                                         ? 'bg-[#d0b216] border-[#d0b216] text-[#182b5c] font-bold'
                                         : 'bg-background border-border text-foreground hover:border-[#d0b216]'
-                                }`}
+                                    }`}
                             >
                                 {pill.label}
                             </button>
@@ -380,11 +377,10 @@ export default function EventIndex({ events, filters }: Props) {
                                 <button
                                     key={tab.value}
                                     onClick={() => handleFilterTab(tab.value)}
-                                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                                        active
+                                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${active
                                             ? 'bg-white shadow text-[#182b5c] font-bold dark:bg-background'
                                             : 'text-muted-foreground hover:text-foreground'
-                                    }`}
+                                        }`}
                                 >
                                     {tab.label}
                                 </button>

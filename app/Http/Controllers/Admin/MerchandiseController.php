@@ -85,4 +85,41 @@ class MerchandiseController extends Controller
 
         return back()->with('success', 'Order marked as fulfilled.');
     }
+
+    /**
+     * Approve a pending merchandise item.
+     */
+    public function approve(Merchandise $merchandise)
+    {
+        if ($merchandise->status !== MerchandiseStatus::Pending) {
+            return back()->with('error', 'Only pending merchandise can be approved.');
+        }
+
+        $merchandise->update(['status' => MerchandiseStatus::Available]);
+
+        activity()
+            ->performedOn($merchandise)
+            ->log('Merchandise approved');
+
+        return back()->with('success', 'Merchandise approved.');
+    }
+
+    /**
+     * Reject a pending merchandise item.
+     */
+    public function reject(Request $request, Merchandise $merchandise)
+    {
+        if ($merchandise->status !== MerchandiseStatus::Pending) {
+            return back()->with('error', 'Only pending merchandise can be rejected.');
+        }
+
+        $merchandise->update(['status' => MerchandiseStatus::Discontinued]);
+
+        activity()
+            ->performedOn($merchandise)
+            ->withProperties(['reason' => $request->input('reason')])
+            ->log('Merchandise rejected');
+
+        return back()->with('success', 'Merchandise rejected.');
+    }
 }

@@ -82,9 +82,18 @@ function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recen
 }
 
 function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders, recentPayments, announcements, openTickets }: StudentProps) {
+    const { auth } = usePage().props as { auth: { user: { roles?: string[] } | null } };
+    const leaderOf = (usePage().props as any).leaderOf as { id: number; name: string; slug: string }[] | undefined;
+
     return (
         <div className="space-y-6">
-            <div><h1 className="text-2xl font-bold tracking-tight">Dashboard</h1><p className="text-muted-foreground">Welcome back! Here's what's happening.</p></div>
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+                <p className="text-muted-foreground">Welcome back! Here's what's happening.</p>
+                {leaderOf && leaderOf.length > 0 && (
+                    <p className="mt-2 text-sm text-muted-foreground">You are a club leader for {leaderOf.map(l => l.name).join(', ')}.</p>
+                )}
+            </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <Card><CardContent className="flex items-center gap-3 p-4"><div className={`rounded-lg p-2 ${badgeTone.accent}`}><Shield className="h-5 w-5" /></div><div><p className="text-2xl font-bold">{myClubs.length}</p><p className="text-xs text-muted-foreground">My Clubs</p></div></CardContent></Card>
                 <Card><CardContent className="flex items-center gap-3 p-4"><div className={`rounded-lg p-2 ${badgeTone.success}`}><CalendarDays className="h-5 w-5" /></div><div><p className="text-2xl font-bold">{myUpcomingEvents.length}</p><p className="text-xs text-muted-foreground">Upcoming</p></div></CardContent></Card>

@@ -33,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ClubIndex({ clubs, filters, categories }: Props) {
-    const { auth } = usePage().props as { auth: { user: { permissions: string[] } | null } };
+    const { auth, can } = usePage().props as { auth: { user: { permissions: string[] } | null }, can?: { createClub?: boolean } };
     const [search, setSearch] = useState(filters.search);
 
     const handleSearch = useCallback(
@@ -68,7 +68,7 @@ export default function ClubIndex({ clubs, filters, categories }: Props) {
                             Browse and join student clubs at KCA University
                         </p>
                     </div>
-                    {auth.user && (
+                    {can?.createClub && (
                         <Link href={create.url()}>
                             <Button>
                                 <Plus className="mr-2 h-4 w-4" />

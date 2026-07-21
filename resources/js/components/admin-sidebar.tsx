@@ -16,7 +16,7 @@ import type { NavItem } from '@/types';
 const adminNavItems: NavItem[] = [
     { title: 'Dashboard', href: { url: '/admin', method: 'get' }, icon: LayoutDashboard },
     { title: 'Events', href: { url: '/admin/events', method: 'get' }, icon: CalendarDays },
-    { title: 'Event Approvals', href: { url: '/admin/events/approve', method: 'get' }, icon: Shield },
+    { title: 'Event Approvals', href: { url: '/admin/events', method: 'get', data: { status: 'pending' } }, icon: Shield },
     { title: 'Clubs', href: { url: '/admin/clubs', method: 'get' }, icon: Users },
     { title: 'Users', href: { url: '/admin/users', method: 'get' }, icon: UserCog },
     { title: 'Announcements', href: { url: '/admin/announcements', method: 'get' }, icon: Megaphone },

@@ -25,6 +25,8 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
     const [quantity, setQuantity] = useState(1);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState((user as { phone?: string | null } | null)?.phone ?? '');
+    const [stkProcessing, setStkProcessing] = useState(false);
+    const [stkError, setStkError] = useState<string | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Merchandise', href: '/merchandise' },
@@ -38,12 +40,24 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
 
     const handleConfirmOrder = (e: FormEvent) => {
         e.preventDefault();
-
+        setStkError(null);
+        setStkProcessing(true);
         router.post(
             `/merchandise/${item.id}/order`,
             { quantity, phone_number: phoneNumber || undefined },
             {
-                onSuccess: () => setPhoneDialogOpen(false),
+                onSuccess: (page) => {
+                    const flash = (page.props as { flash?: { error?: string; success?: string } }).flash;
+                    if (flash?.error) {
+                        setStkError(flash.error);
+                    } else {
+                        setPhoneDialogOpen(false);
+                    }
+                },
+                onError: (errors) => {
+                    setStkError(Object.values(errors)[0] ?? 'Something went wrong. Please try again.');
+                },
+                onFinish: () => setStkProcessing(false),
             },
         );
     };
@@ -119,7 +133,7 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
                             </form>
                         )}
 
-                        <Dialog open={phoneDialogOpen} onOpenChange={setPhoneDialogOpen}>
+                        <Dialog open={phoneDialogOpen} onOpenChange={(open) => { setPhoneDialogOpen(open); if (!open) setStkError(null); }}>
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>Confirm Payment Details</DialogTitle>
@@ -143,11 +157,19 @@ export default function MerchandiseShow({ merchandise: item, relatedItems }: Pro
                                         Quantity: {quantity} • Total: {(item.price * quantity / 100).toLocaleString('en-KE', { style: 'currency', currency: 'KES' })}
                                     </p>
 
+                                    {stkError && (
+                                        <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
+                                            {stkError}
+                                        </p>
+                                    )}
+
                                     <DialogFooter>
-                                        <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)}>
+                                        <Button type="button" variant="outline" onClick={() => setPhoneDialogOpen(false)} disabled={stkProcessing}>
                                             Cancel
                                         </Button>
-                                        <Button type="submit">Send STK Push</Button>
+                                        <Button type="submit" disabled={stkProcessing}>
+                                            {stkProcessing ? 'Sending…' : 'Send STK Push'}
+                                        </Button>
                                     </DialogFooter>
                                 </form>
                             </DialogContent>

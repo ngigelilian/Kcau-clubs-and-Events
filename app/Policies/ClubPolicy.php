@@ -29,7 +29,8 @@ class ClubPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        // Only club leaders and admins may propose new clubs.
+        return $user->hasRole(['admin', 'super-admin', 'club-leader']);
     }
 
     /**
@@ -38,8 +39,8 @@ class ClubPolicy
      */
     public function update(User $user, Club $club): bool
     {
-        return $user->isLeaderOf($club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($club);
     }
 
     /**
@@ -72,8 +73,8 @@ class ClubPolicy
      */
     public function manageMembers(User $user, Club $club): bool
     {
-        return $user->isLeaderOf($club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($club);
     }
 
     /**
@@ -81,8 +82,8 @@ class ClubPolicy
      */
     public function manageMerchandise(User $user, Club $club): bool
     {
-        return $user->isLeaderOf($club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($club);
     }
 
     /**
@@ -90,7 +91,7 @@ class ClubPolicy
      */
     public function sendAnnouncements(User $user, Club $club): bool
     {
-        return $user->isLeaderOf($club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($club);
     }
 }

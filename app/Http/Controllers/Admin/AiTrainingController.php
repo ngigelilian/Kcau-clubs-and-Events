@@ -10,7 +10,7 @@ class AiTrainingController extends Controller
     public function index(Request $request)
     {
         $entries = AiKnowledgeBase::with('createdBy:id,name')
-            ->when($request->search, fn($q) => $q->where('question', 'ILIKE', "%{$request->search}%"))
+            ->when($request->search, fn($q) => $q->where('question', 'LIKE', "%{$request->search}%"))
             ->when($request->category, fn($q) => $q->where('category', $request->category))
             ->orderByDesc('use_count')
             ->paginate(20)
