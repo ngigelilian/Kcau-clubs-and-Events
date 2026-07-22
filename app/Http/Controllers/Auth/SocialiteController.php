@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class SocialiteController extends Controller
 {
@@ -16,6 +17,7 @@ class SocialiteController extends Controller
     private const ALLOWED_DOMAINS = [
         'students.kcau.ac.ke',
         'kcau.ac.ke',
+        'leaders.kcau.ac.ke',
     ];
 
     /**
@@ -38,12 +40,12 @@ class SocialiteController extends Controller
                 ->with('error', 'Unable to authenticate with Google. Please try again.');
         }
 
-        // Validate email domain
-        $emailDomain = substr(strrchr($googleUser->getEmail(), '@'), 1);
+        // Validate email domain: allow any subdomain of kcau.ac.ke for flexibility
+        $emailDomain = Str::lower(Str::after($googleUser->getEmail(), '@'));
 
-        if (! in_array($emailDomain, self::ALLOWED_DOMAINS)) {
+        if (! Str::endsWith($emailDomain, 'kcau.ac.ke')) {
             return redirect()->route('login')
-                ->with('error', 'Only KCAU email addresses (@students.kcau.ac.ke or @kcau.ac.ke) are allowed.');
+                ->with('error', 'Only KCAU email addresses (kcau.ac.ke subdomains) are allowed.');
         }
 
         // Find or create user
@@ -80,8 +82,8 @@ class SocialiteController extends Controller
                 'is_active' => true,
             ]);
 
-            // Auto-assign student role on first OAuth login
-            $user->assignRole('student');
+            // Trigger the Registered event so domain-based role assignment runs
+            event(new \Illuminate\Auth\Events\Registered($user));
 
             activity()
                 ->causedBy($user)

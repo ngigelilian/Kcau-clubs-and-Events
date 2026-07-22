@@ -4,6 +4,9 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Club;
+use App\Models\Event;
+use Illuminate\Support\Facades\URL;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,16 +38,32 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Ensure generated absolute URLs use the current request host (fixes stale APP_URL like ngrok)
+        try {
+            URL::forceRootUrl($request->getSchemeAndHttpHost());
+        } catch (\Throwable $e) {
+            // noop - don't break requests if URL forcing fails
+        }
+
         $user = $request->user();
+
+        $roles = $user ? $user->getRoleNames()->toArray() : [];
+        $permissions = $user ? $user->getAllPermissions()->pluck('name')->toArray() : [];
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $user ? array_merge($user->toArray(), [
-                    'roles' => $user->getRoleNames(),
-                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'roles' => $roles,
+                    'permissions' => $permissions,
+                    'is_leader' => in_array('club-leader', $roles, true),
+                    'is_student' => in_array('student', $roles, true),
                 ]) : null,
+            ],
+            'can' => [
+                'createClub' => $user ? $user->can('create', Club::class) : false,
+                'createEvent' => $user ? $user->can('create', Event::class) : false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [

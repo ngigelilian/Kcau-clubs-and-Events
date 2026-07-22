@@ -218,6 +218,20 @@ class PaymentService
                 'failure_reason' => $callback['result_description'],
             ]);
 
+            // Restore stock for merchandise orders that failed payment
+            if ($order->orderable_type === \App\Models\Merchandise::class) {
+                $merchandise = \App\Models\Merchandise::find($order->orderable_id);
+                if ($merchandise) {
+                    $merchandise->increment('stock_quantity', $order->quantity);
+                    if ($merchandise->status === \App\Enums\MerchandiseStatus::OutOfStock && $merchandise->fresh()->stock_quantity > 0) {
+                        $merchandise->update(['status' => \App\Enums\MerchandiseStatus::Available]);
+                    }
+                }
+            }
+
+            // Cancel the order
+            $order->update(['status' => \App\Enums\OrderStatus::Cancelled]);
+
             return $paymentModel->fresh();
         });
 

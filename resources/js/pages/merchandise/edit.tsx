@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MultiImageUpload } from '@/components/ui/image-upload';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Merchandise } from '@/types';
@@ -68,11 +69,14 @@ export default function MerchandiseEdit({ merchandise: item }: Props) {
                                     {errors.stock_quantity && <p className="text-sm text-destructive">{errors.stock_quantity}</p>}
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="images">Product Images (replace existing)</Label>
-                                {item.image_urls?.[0] && <img src={item.image_urls[0]} alt="Current" className="h-24 w-24 rounded-lg object-cover" />}
-                                <Input id="images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setData('images', Array.from(e.target.files || []))} />
-                            </div>
+                            <MultiImageUpload
+                                id="images"
+                                label="Product Images"
+                                hint="Select new images to replace all existing ones. Leave empty to keep current images."
+                                currentUrls={item.image_urls ?? []}
+                                onChange={(files) => setData('images', files)}
+                                error={errors.images}
+                            />
                         </CardContent>
                     </Card>
 

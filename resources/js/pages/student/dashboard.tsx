@@ -139,11 +139,6 @@ export default function StudentDashboard({
             gradient: 'from-yellow-400 to-amber-500',
             icon: <Star className="w-10 h-10 opacity-20" />,
         },
-        {
-            label: 'Campus Rank', value: `#${stats.rank}`, emoji: '🏆',
-            gradient: 'from-purple-500 to-violet-600',
-            icon: <Trophy className="w-10 h-10 opacity-20" />,
-        },
     ];
 
     return (

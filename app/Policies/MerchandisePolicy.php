@@ -29,7 +29,7 @@ class MerchandisePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['admin', 'super-admin'])
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
             || $user->clubMemberships()->leaders()->active()->exists();
     }
 
@@ -38,8 +38,8 @@ class MerchandisePolicy
      */
     public function update(User $user, Merchandise $merchandise): bool
     {
-        return $user->isLeaderOf($merchandise->club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($merchandise->club);
     }
 
     /**
@@ -47,8 +47,8 @@ class MerchandisePolicy
      */
     public function delete(User $user, Merchandise $merchandise): bool
     {
-        return $user->isLeaderOf($merchandise->club)
-            || $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->isLeaderOf($merchandise->club);
     }
 
     /**

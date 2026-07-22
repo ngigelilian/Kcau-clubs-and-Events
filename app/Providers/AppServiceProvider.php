@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Event;
+use App\Listeners\AssignRoleByEmailDomain;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,5 +62,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super-admin') ? true : null;
         });
+
+        // Register event listener for automatic role assignment on registration
+        Event::listen(Registered::class, [AssignRoleByEmailDomain::class, 'handle']);
+        // Ensure roles match domain at login as a safety net
+        Event::listen(\Illuminate\Auth\Events\Login::class, [\App\Listeners\EnsureRoleMatchesOnLogin::class, 'handle']);
     }
 }

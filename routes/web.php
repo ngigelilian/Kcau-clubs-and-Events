@@ -197,6 +197,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/merchandise', [AdminMerchandiseController::class, 'index'])->name('merchandise.index');
         Route::get('/merchandise/orders', [AdminMerchandiseController::class, 'orders'])->name('merchandise.orders');
         Route::post('/merchandise/orders/{order}/fulfill', [AdminMerchandiseController::class, 'fulfillOrder'])->name('merchandise.orders.fulfill');
+        Route::post('/merchandise/{merchandise}/approve', [AdminMerchandiseController::class, 'approve'])->name('merchandise.approve');
+        Route::post('/merchandise/{merchandise}/reject', [AdminMerchandiseController::class, 'reject'])->name('merchandise.reject');
 
         // Announcements
         Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->name('announcements.index');

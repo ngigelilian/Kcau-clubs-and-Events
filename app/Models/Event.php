@@ -4,6 +4,11 @@ namespace App\Models;
 
 use App\Enums\EventStatus;
 use App\Enums\EventType;
+use App\Enums\RegistrationStatus;
+use App\Models\EventFeedback;
+use App\Models\EventRegistration;
+use App\Models\EventSession;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +34,8 @@ class Event extends Model implements HasMedia
         'club_id',
         'type',
         'venue',
+        'campus',
+        'qr_token',
         'start_datetime',
         'end_datetime',
         'capacity',
@@ -193,8 +200,8 @@ class Event extends Model implements HasMedia
     public function scopeSearch($query, string $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('title', 'ILIKE', "%{$search}%")
-              ->orWhere('description', 'ILIKE', "%{$search}%");
+            $q->where('title', 'LIKE', "%{$search}%")
+              ->orWhere('description', 'LIKE', "%{$search}%");
         });
     }
 

@@ -18,9 +18,9 @@ class UserManagementController extends Controller
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ILIKE', "%{$search}%")
-                  ->orWhere('email', 'ILIKE', "%{$search}%")
-                  ->orWhere('student_id', 'ILIKE', "%{$search}%");
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('student_id', 'LIKE', "%{$search}%");
             });
         }
 
@@ -34,7 +34,7 @@ class UserManagementController extends Controller
 
         $users = $query->latest()->paginate(20)->withQueryString();
 
-        $roles = Role::orderBy('name')->get(['id', 'name']);
+        $roles = Role::orderBy('name')->pluck('name');
 
         return Inertia::render('admin/users/index', [
             'users' => $users,
@@ -58,7 +58,7 @@ class UserManagementController extends Controller
             'tickets as tickets_count',
         ]);
 
-        $roles = Role::orderBy('name')->get(['id', 'name']);
+        $roles = Role::orderBy('name')->pluck('name');
 
         return Inertia::render('admin/users/show', [
             'user' => $user,

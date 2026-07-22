@@ -191,30 +191,32 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     {club.events.map((event) => (
-                                        <div key={event.id} className="flex items-center justify-between rounded-lg border p-3">
-                                            <div>
-                                                <p className="font-medium">{event.title}</p>
-                                                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                                    <span className="flex items-center gap-1">
-                                                        <Calendar className="h-3.5 w-3.5" />
-                                                        {new Date(event.start_datetime).toLocaleDateString('en-KE', {
-                                                            day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric',
-                                                        })}
-                                                    </span>
-                                                    <span className="flex items-center gap-1">
-                                                        <MapPin className="h-3.5 w-3.5" />
-                                                        {event.venue}
-                                                    </span>
+                                        <Link key={event.id} href={`/events/${event.slug}`} className="block hover:no-underline">
+                                            <div className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50">
+                                                <div>
+                                                    <p className="font-medium">{event.title}</p>
+                                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="h-3.5 w-3.5" />
+                                                            {new Date(event.start_datetime).toLocaleDateString('en-KE', {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <MapPin className="h-3.5 w-3.5" />
+                                                            {event.venue}
+                                                        </span>
+                                                    </div>
                                                 </div>
+                                                {event.is_paid && (
+                                                    <Badge variant="secondary">
+                                                        KES {(event.fee_amount / 100).toFixed(2)}
+                                                    </Badge>
+                                                )}
                                             </div>
-                                            {event.is_paid && (
-                                                <Badge variant="secondary">
-                                                    KES {(event.fee_amount / 100).toFixed(2)}
-                                                </Badge>
-                                            )}
-                                        </div>
+                                        </Link>
                                     ))}
                                 </CardContent>
                             </Card>

@@ -38,21 +38,23 @@ class TicketController extends Controller
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('subject', 'ILIKE', "%{$search}%")
-                  ->orWhere('description', 'ILIKE', "%{$search}%");
+                $q->where('subject', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
             });
         }
 
         $tickets = $query->latest()->paginate(15)->withQueryString();
 
-        $statusCounts = Ticket::query()
-            ->when(! $isAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->selectRaw("COUNT(*) as total")
-            ->selectRaw("COUNT(*) FILTER (WHERE status = 'open') as open")
-            ->selectRaw("COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress")
-            ->selectRaw("COUNT(*) FILTER (WHERE status = 'resolved') as resolved")
-            ->selectRaw("COUNT(*) FILTER (WHERE status = 'closed') as closed")
-            ->first();
+        $baseCountQuery = Ticket::query()
+            ->when(! $isAdmin, fn ($q) => $q->where('user_id', $user->id));
+
+        $statusCounts = (object) [
+            'total'       => (clone $baseCountQuery)->count(),
+            'open'        => (clone $baseCountQuery)->where('status', 'open')->count(),
+            'in_progress' => (clone $baseCountQuery)->where('status', 'in_progress')->count(),
+            'resolved'    => (clone $baseCountQuery)->where('status', 'resolved')->count(),
+            'closed'      => (clone $baseCountQuery)->where('status', 'closed')->count(),
+        ];
 
         return Inertia::render('tickets/index', [
             'tickets' => $tickets,

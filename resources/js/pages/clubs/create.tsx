@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SingleImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -204,34 +205,22 @@ export default function ClubCreate({ categories }: Props) {
                             )}
 
                             {/* Logo Upload */}
-                            <div className="space-y-2">
-                                <Label htmlFor="logo">Club Logo (optional)</Label>
-                                <Input
-                                    id="logo"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={(e) => setData('logo', e.target.files?.[0] ?? null)}
-                                />
-                                <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP. Max 5MB.</p>
-                                {errors.logo && (
-                                    <p className="text-sm text-destructive">{errors.logo}</p>
-                                )}
-                            </div>
+                            <SingleImageUpload
+                                id="logo"
+                                label="Club Logo (optional)"
+                                hint="JPEG, PNG, or WebP · max 5 MB · recommended 400×400 px"
+                                onChange={(file) => setData('logo', file)}
+                                error={errors.logo}
+                            />
 
                             {/* Banner Upload */}
-                            <div className="space-y-2">
-                                <Label htmlFor="banner">Banner Image (optional)</Label>
-                                <Input
-                                    id="banner"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={(e) => setData('banner', e.target.files?.[0] ?? null)}
-                                />
-                                <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP. Max 5MB. Recommended: 1200×400px.</p>
-                                {errors.banner && (
-                                    <p className="text-sm text-destructive">{errors.banner}</p>
-                                )}
-                            </div>
+                            <SingleImageUpload
+                                id="banner"
+                                label="Banner Image (optional)"
+                                hint="JPEG, PNG, or WebP · max 5 MB · recommended 1200×400 px"
+                                onChange={(file) => setData('banner', file)}
+                                error={errors.banner}
+                            />
 
                             {/* Submit */}
                             <div className="flex justify-end gap-3">

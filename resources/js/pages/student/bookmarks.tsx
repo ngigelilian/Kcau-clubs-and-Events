@@ -84,10 +84,10 @@ export default function Bookmarks({ bookmarks }: Props) {
                                             <div className="w-full h-full bg-gradient-to-br from-[#182b5c] to-[#1e3a7a]" />
                                         )}
 
-                                        {/* Remove bookmark button */}
+                                        {/* Remove bookmark button — always visible on touch, hover on desktop */}
                                         <button
                                             onClick={() => removeBookmark(ev.slug)}
-                                            className="absolute top-2 right-2 bg-white/90 hover:bg-white text-destructive rounded-full p-1.5 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute top-2 right-2 bg-white/90 hover:bg-white text-destructive rounded-full p-1.5 shadow opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                             title="Remove bookmark">
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
