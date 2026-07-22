@@ -38,7 +38,9 @@ class MerchandisePolicy
      */
     public function update(User $user, Merchandise $merchandise): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        // 'club-leader' is a global role, not scoped to one club — only
+        // admins bypass the per-club leadership check.
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($merchandise->club);
     }
 
@@ -47,7 +49,7 @@ class MerchandisePolicy
      */
     public function delete(User $user, Merchandise $merchandise): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($merchandise->club);
     }
 

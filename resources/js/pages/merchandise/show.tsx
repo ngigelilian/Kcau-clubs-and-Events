@@ -15,13 +15,12 @@ import type { BreadcrumbItem, Merchandise } from '@/types';
 interface Props {
     merchandise: Merchandise;
     relatedItems: Merchandise[];
+    canEdit: boolean;
 }
 
-export default function MerchandiseShow({ merchandise: item, relatedItems }: Props) {
+export default function MerchandiseShow({ merchandise: item, relatedItems, canEdit }: Props) {
     const { auth } = usePage().props as { auth: { user: { id: number; permissions: string[]; roles: string[] } | null } };
     const user = auth.user;
-    const isAdmin = user?.roles?.includes('admin') || user?.roles?.includes('super-admin');
-    const canEdit = user?.permissions?.includes('merchandise.update') || isAdmin;
     const [quantity, setQuantity] = useState(1);
     const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState((user as { phone?: string | null } | null)?.phone ?? '');

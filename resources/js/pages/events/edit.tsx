@@ -69,7 +69,7 @@ export default function EventEdit({ event, clubs, eventTypes, canCreateSchoolEve
         setTimeout(() => post(`/events/${event.slug}`, { forceFormData: true }), 0);
     };
 
-    const handleSubmitForApproval = () => {
+    const handlePrimarySubmit = () => {
         setData('submit_for_approval', true);
         setTimeout(() => post(`/events/${event.slug}`, { forceFormData: true }), 0);
     };
@@ -259,8 +259,12 @@ export default function EventEdit({ event, clubs, eventTypes, canCreateSchoolEve
                         <Button type="button" variant="secondary" disabled={processing} onClick={handleSaveDraft}>
                             {processing ? 'Saving…' : 'Save as Draft'}
                         </Button>
-                        <Button type="button" disabled={processing} onClick={handleSubmitForApproval}>
-                            {processing ? 'Submitting…' : 'Submit for Approval'}
+                        <Button type="button" disabled={processing} onClick={handlePrimarySubmit}>
+                            {processing
+                                ? 'Submitting…'
+                                : data.type === 'school'
+                                    ? 'Submit for Approval'
+                                    : 'Publish Event'}
                         </Button>
                     </div>
                 </div>

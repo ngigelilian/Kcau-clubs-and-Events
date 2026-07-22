@@ -65,7 +65,10 @@ export default function EventCreate({ clubs, eventTypes, canCreateSchoolEvents }
         setTimeout(() => post('/events', { forceFormData: true }), 0);
     };
 
-    const handleSubmitForApproval = () => {
+    // Club events publish immediately (no approval needed); school events
+    // are sent to an admin for approval. The backend decides the resulting
+    // status based on `type` — this just flips the submit flag on.
+    const handlePrimarySubmit = () => {
         setData('submit_for_approval', true);
         setTimeout(() => post('/events', { forceFormData: true }), 0);
     };
@@ -129,6 +132,11 @@ export default function EventCreate({ clubs, eventTypes, canCreateSchoolEvents }
                                         </SelectContent>
                                     </Select>
                                     {errors.type && <p className="text-sm text-destructive">{errors.type}</p>}
+                                    <p className="text-xs text-muted-foreground">
+                                        {data.type === 'school'
+                                            ? 'School events are reviewed by an admin before going live.'
+                                            : 'Club events publish immediately once submitted — no admin approval needed.'}
+                                    </p>
                                 </div>
 
                                 {data.type === 'club' && (
@@ -290,8 +298,12 @@ export default function EventCreate({ clubs, eventTypes, canCreateSchoolEvents }
                         <Button type="button" variant="secondary" disabled={processing} onClick={handleSaveDraft}>
                             {processing ? 'Saving…' : 'Save as Draft'}
                         </Button>
-                        <Button type="button" disabled={processing} onClick={handleSubmitForApproval}>
-                            {processing ? 'Submitting…' : 'Submit for Approval'}
+                        <Button type="button" disabled={processing} onClick={handlePrimarySubmit}>
+                            {processing
+                                ? 'Submitting…'
+                                : data.type === 'school'
+                                    ? 'Submit for Approval'
+                                    : 'Publish Event'}
                         </Button>
                     </div>
                 </div>

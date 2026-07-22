@@ -1,7 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Users, CalendarDays, ShoppingBag, Bell, LifeBuoy, ArrowRight,
-    Clock, DollarSign, Shield
+    Clock, DollarSign, Shield, Plus, Crown
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -82,16 +82,42 @@ function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recen
 }
 
 function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders, recentPayments, announcements, openTickets }: StudentProps) {
-    const { auth } = usePage().props as { auth: { user: { roles?: string[] } | null } };
+    const { auth, can } = usePage().props as {
+        auth: { user: { roles?: string[]; is_leader?: boolean } | null };
+        can?: { createClub?: boolean; createEvent?: boolean };
+    };
     const leaderOf = (usePage().props as any).leaderOf as { id: number; name: string; slug: string }[] | undefined;
+    const isLeader = !!auth.user?.is_leader || !!(leaderOf && leaderOf.length > 0);
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground">Welcome back! Here's what's happening.</p>
-                {leaderOf && leaderOf.length > 0 && (
-                    <p className="mt-2 text-sm text-muted-foreground">You are a club leader for {leaderOf.map(l => l.name).join(', ')}.</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+                        <Badge variant={isLeader ? 'default' : 'outline'} className="gap-1">
+                            {isLeader && <Crown className="h-3 w-3" />}
+                            {isLeader ? 'Club Leader' : 'Student'}
+                        </Badge>
+                    </div>
+                    <p className="text-muted-foreground">Welcome back! Here's what's happening.</p>
+                    {isLeader && (
+                        <p className="mt-2 text-sm text-muted-foreground">You lead {leaderOf!.map(l => l.name).join(', ')}.</p>
+                    )}
+                </div>
+                {(can?.createClub || can?.createEvent) && (
+                    <div className="flex gap-2">
+                        {can?.createClub && (
+                            <Link href="/clubs/create">
+                                <Button variant="outline" size="sm"><Plus className="mr-1 h-4 w-4" />Propose a Club</Button>
+                            </Link>
+                        )}
+                        {can?.createEvent && (
+                            <Link href="/events/create">
+                                <Button size="sm"><Plus className="mr-1 h-4 w-4" />Create Event</Button>
+                            </Link>
+                        )}
+                    </div>
                 )}
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

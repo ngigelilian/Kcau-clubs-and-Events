@@ -53,13 +53,13 @@ Route::post('/api/ai/feedback/{log}', [AiChatController::class, 'rateFeedback'])
 // -------------------------------------------------------------------------
 
 Route::get('clubs', [ClubController::class, 'index'])->name('clubs.index');
-Route::get('clubs/{club}', [ClubController::class, 'show'])->name('clubs.show');
+Route::get('clubs/{club}', [ClubController::class, 'show'])->where('club', '^(?!create$).*$')->name('clubs.show');
 
 Route::get('events', [EventController::class, 'index'])->name('events.index');
-Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
+Route::get('events/{event}', [EventController::class, 'show'])->where('event', '^(?!create$).*$')->name('events.show');
 
 Route::get('merchandise', [MerchandiseController::class, 'index'])->name('merchandise.index');
-Route::get('merchandise/{merchandise}', [MerchandiseController::class, 'show'])->name('merchandise.show');
+Route::get('merchandise/{merchandise}', [MerchandiseController::class, 'show'])->where('merchandise', '^(?!create$).*$')->name('merchandise.show');
 
 // -------------------------------------------------------------------------
 // Authenticated Routes

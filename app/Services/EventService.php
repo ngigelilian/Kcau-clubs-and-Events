@@ -21,7 +21,7 @@ class EventService
         return DB::transaction(function () use ($data, $creator) {
             $this->assertOwnershipRules($data, $creator);
 
-            $status = $this->resolveCreateStatus($data);
+            $status = $this->resolveCreateStatus($data, $creator);
 
             $event = Event::create([
                 'title' => $data['title'],
@@ -49,7 +49,11 @@ class EventService
             activity()
                 ->performedOn($event)
                 ->causedBy($creator)
-                ->log($status === EventStatus::Pending ? 'Event submitted for approval' : 'Event saved as draft');
+                ->log(match ($status) {
+                    EventStatus::Pending => 'Event submitted for approval',
+                    EventStatus::Approved => 'Event published',
+                    default => 'Event saved as draft',
+                });
 
             return $event;
         });
@@ -77,7 +81,7 @@ class EventService
 
             $this->assertOwnershipRules($normalized, $actor);
 
-            $nextStatus = $this->resolveUpdateStatus($event, $data);
+            $nextStatus = $this->resolveUpdateStatus($event, $data, $actor);
             $normalized['status'] = $nextStatus;
 
             if ($nextStatus === EventStatus::Pending) {
@@ -94,7 +98,11 @@ class EventService
             activity()
                 ->performedOn($event)
                 ->causedBy($actor)
-                ->log($nextStatus === EventStatus::Pending ? 'Event submitted for approval' : 'Event draft updated');
+                ->log(match ($nextStatus) {
+                    EventStatus::Pending => 'Event submitted for approval',
+                    EventStatus::Approved => 'Event published',
+                    default => 'Event draft updated',
+                });
 
             return $event->fresh();
         });
@@ -105,8 +113,14 @@ class EventService
         $type = $data['type'] instanceof EventType ? $data['type'] : EventType::from((string) $data['type']);
 
         if ($type === EventType::School) {
-            if (! $actor->hasRole(['admin', 'super-admin'])) {
-                throw new AuthorizationException('Only Admin or Super Admin can create school-wide events.');
+            // Admins and club leaders may both propose school-wide events.
+            // A leader's school event still requires admin approval — see
+            // resolveCreateStatus()/resolveUpdateStatus() below.
+            $isLeader = $actor->hasRole(['admin', 'super-admin', 'club-leader'])
+                || $actor->clubMemberships()->leaders()->active()->exists();
+
+            if (! $isLeader) {
+                throw new AuthorizationException('Only club leaders and admins can create school-wide events.');
             }
 
             return;
@@ -127,26 +141,53 @@ class EventService
         }
     }
 
-    private function resolveCreateStatus(array $data): EventStatus
+    /**
+     * Determine the status a newly-submitted event should get.
+     *
+     * - Not submitting yet ("Save as Draft") -> always Draft, regardless of type.
+     * - Club events -> published immediately (Approved). Leaders don't need
+     *   admin approval to run their own club's events.
+     * - School events -> require admin approval (Pending), unless the
+     *   creator is already an admin, in which case it publishes directly.
+     */
+    private function resolveCreateStatus(array $data, User $creator): EventStatus
     {
-        return (bool) ($data['submit_for_approval'] ?? false)
-            ? EventStatus::Pending
-            : EventStatus::Draft;
-    }
-
-    private function resolveUpdateStatus(Event $event, array $data): EventStatus
-    {
-        $submit = (bool) ($data['submit_for_approval'] ?? false);
-
-        if ($submit && in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)) {
-            return EventStatus::Pending;
-        }
-
-        if (! $submit && in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)) {
+        if (! (bool) ($data['submit_for_approval'] ?? false)) {
             return EventStatus::Draft;
         }
 
-        return $event->status;
+        $type = $data['type'] instanceof EventType ? $data['type'] : EventType::from((string) $data['type']);
+        $isAdmin = $creator->hasRole(['admin', 'super-admin']);
+
+        if ($type === EventType::School) {
+            return $isAdmin ? EventStatus::Approved : EventStatus::Pending;
+        }
+
+        return EventStatus::Approved;
+    }
+
+    private function resolveUpdateStatus(Event $event, array $data, User $actor): EventStatus
+    {
+        $submit = (bool) ($data['submit_for_approval'] ?? false);
+
+        if (! $submit) {
+            return in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)
+                ? EventStatus::Draft
+                : $event->status;
+        }
+
+        if (! in_array($event->status, [EventStatus::Draft, EventStatus::Rejected], true)) {
+            return $event->status;
+        }
+
+        $type = $data['type'] instanceof EventType ? $data['type'] : EventType::from((string) $data['type']);
+        $isAdmin = $actor->hasRole(['admin', 'super-admin']);
+
+        if ($type === EventType::School) {
+            return $isAdmin ? EventStatus::Approved : EventStatus::Pending;
+        }
+
+        return EventStatus::Approved;
     }
 
     public function approveEvent(Event $event, User $approver): Event

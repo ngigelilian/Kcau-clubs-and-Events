@@ -45,10 +45,12 @@ class EventPolicy
 
     /**
      * Determine whether the user can create a school-wide event.
+     * Leaders may propose school events too — they just require admin approval.
      */
     public function createSchool(User $user): bool
     {
-        return $user->hasRole(['admin', 'super-admin']);
+        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            || $user->clubMemberships()->leaders()->active()->exists();
     }
 
     /**

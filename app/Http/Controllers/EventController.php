@@ -173,7 +173,8 @@ class EventController extends Controller
 
         return Inertia::render('events/create', [
             'clubs' => $clubs,
-            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin']),
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin', 'club-leader'])
+                || $user->clubMemberships()->leaders()->active()->exists(),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,
                 'label' => $t->label(),
@@ -190,12 +191,12 @@ class EventController extends Controller
             $request->user(),
         );
 
-        $wasSubmitted = (bool) ($data['submit_for_approval'] ?? false);
-
         return to_route('events.show', $event)
-            ->with('success', $wasSubmitted
-                ? 'Event submitted for approval. An admin will review it before publishing.'
-                : 'Draft saved successfully. You can submit it for approval when ready.');
+            ->with('success', match ($event->status) {
+                \App\Enums\EventStatus::Approved => 'Event published! It is now live for students to see.',
+                \App\Enums\EventStatus::Pending => 'Event submitted for approval. An admin will review it before publishing.',
+                default => 'Draft saved successfully. You can publish it or submit it for approval when ready.',
+            });
     }
 
     public function edit(Request $request, Event $event): Response
@@ -222,7 +223,8 @@ class EventController extends Controller
         return Inertia::render('events/edit', [
             'event' => $event,
             'clubs' => $clubs,
-            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin']),
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin', 'club-leader'])
+                || $user->clubMemberships()->leaders()->active()->exists(),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,
                 'label' => $t->label(),
@@ -234,13 +236,14 @@ class EventController extends Controller
     {
         $data = $request->validated();
         $this->eventService->updateEvent($event, $data, $request->user());
-
-        $wasSubmitted = (bool) ($data['submit_for_approval'] ?? false);
+        $event->refresh();
 
         return to_route('events.show', $event)
-            ->with('success', $wasSubmitted
-                ? 'Event submitted for approval.'
-                : 'Draft updated successfully.');
+            ->with('success', match ($event->status) {
+                \App\Enums\EventStatus::Approved => 'Event published! It is now live for students to see.',
+                \App\Enums\EventStatus::Pending => 'Event submitted for approval.',
+                default => 'Draft updated successfully.',
+            });
     }
 
     public function register(InitiateEventRegistrationRequest $request, Event $event)

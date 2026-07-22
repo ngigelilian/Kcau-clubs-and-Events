@@ -39,7 +39,10 @@ class ClubPolicy
      */
     public function update(User $user, Club $club): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        // NOTE: 'club-leader' is a single global role, not scoped to one
+        // club, so it must not grant access on its own — otherwise a leader
+        // of Club A could edit Club B. Only admins bypass the per-club check.
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
     }
 
@@ -73,7 +76,7 @@ class ClubPolicy
      */
     public function manageMembers(User $user, Club $club): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
     }
 
@@ -82,7 +85,7 @@ class ClubPolicy
      */
     public function manageMerchandise(User $user, Club $club): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
     }
 
@@ -91,7 +94,7 @@ class ClubPolicy
      */
     public function sendAnnouncements(User $user, Club $club): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
     }
 }

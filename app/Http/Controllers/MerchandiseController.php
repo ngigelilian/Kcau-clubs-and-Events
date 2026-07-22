@@ -93,6 +93,7 @@ class MerchandiseController extends Controller
         return Inertia::render('merchandise/show', [
             'merchandise' => $merchandise,
             'relatedItems' => $related,
+            'canEdit' => auth()->user()?->can('update', $merchandise) ?? false,
         ]);
     }
 

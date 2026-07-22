@@ -24,10 +24,17 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        // Every new sign-up starts out as a plain student. Club leadership is
+        // granted later, either by an admin or automatically when one of
+        // their proposed clubs is approved (see ClubService::approveClub()).
+        $user->assignRole('student');
+
+        return $user;
     }
 }
