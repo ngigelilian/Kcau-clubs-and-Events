@@ -18,7 +18,6 @@ use Spatie\Permission\Models\Role;
 beforeEach(function () {
     Role::findOrCreate('super-admin', 'web');
     Role::findOrCreate('admin', 'web');
-    Role::findOrCreate('club-leader', 'web');
     Role::findOrCreate('student', 'web');
 });
 
@@ -59,7 +58,7 @@ it('promotes proposer membership to active leader when club is approved', functi
         ->firstOrFail();
 
     expect($membership->status)->toBe(MembershipStatus::Pending)
-        ->and($membership->role)->toBe(MembershipRole::Leader);
+        ->and($membership->role)->toBe(MembershipRole::Chairperson);
 
     $this->actingAs($admin)
         ->post(route('admin.clubs.approve', $club))
@@ -71,16 +70,16 @@ it('promotes proposer membership to active leader when club is approved', functi
 
     expect($club->status)->toBe(ClubStatus::Active)
         ->and($membership->status)->toBe(MembershipStatus::Active)
-        ->and($membership->role)->toBe(MembershipRole::Leader)
+        ->and($membership->role)->toBe(MembershipRole::Chairperson)
         ->and($membership->joined_at)->not()->toBeNull()
-        ->and($proposer->hasRole('club-leader'))->toBeTrue();
+        ->and($membership->leadership_since)->not()->toBeNull();
 });
 
 it('updates join request status on approve and reject actions', function () {
     $leader = User::factory()->create();
     $club = Club::factory()->active()->create(['created_by' => $leader->id]);
 
-    ClubMembership::factory()->leader()->create([
+    ClubMembership::factory()->chairperson()->create([
         'club_id' => $club->id,
         'user_id' => $leader->id,
         'status' => MembershipStatus::Active,
@@ -149,7 +148,7 @@ it('marks attendance and updates registration status', function () {
     $leader = User::factory()->create();
     $club = Club::factory()->active()->create(['created_by' => $leader->id]);
 
-    ClubMembership::factory()->leader()->create([
+    ClubMembership::factory()->chairperson()->create([
         'club_id' => $club->id,
         'user_id' => $leader->id,
         'status' => MembershipStatus::Active,
@@ -188,27 +187,32 @@ it('enforces role restrictions for school and club event creation', function () 
     $admin->assignRole('admin');
 
     $leader = User::factory()->create();
-    $leader->assignRole('club-leader');
-
     $nonLeader = User::factory()->create();
 
     $club = Club::factory()->active()->create(['created_by' => $leader->id]);
 
-    ClubMembership::factory()->leader()->create([
+    ClubMembership::factory()->chairperson()->create([
         'club_id' => $club->id,
         'user_id' => $leader->id,
         'status' => MembershipStatus::Active,
     ]);
 
+    // A leader CAN propose a school-wide event — it just requires admin approval.
     $leaderSchoolPayload = eventPayload([
+        'title' => 'Leader School Event ' . fake()->unique()->numerify('###'),
         'type' => EventType::School->value,
         'club_id' => null,
     ]);
 
     $this->actingAs($leader)
         ->post(route('events.store'), $leaderSchoolPayload)
-        ->assertSessionHasErrors('type');
+        ->assertRedirect();
 
+    $createdSchoolEvent = Event::where('title', $leaderSchoolPayload['title'])->firstOrFail();
+    expect($createdSchoolEvent->type)->toBe(EventType::School)
+        ->and($createdSchoolEvent->status)->toBe(EventStatus::Pending);
+
+    // A leader's own club event publishes immediately — no approval needed.
     $leaderClubPayload = eventPayload([
         'title' => 'Leader Club Event ' . fake()->unique()->numerify('###'),
         'type' => EventType::Club->value,
@@ -221,9 +225,10 @@ it('enforces role restrictions for school and club event creation', function () 
 
     $createdByLeader = Event::where('title', $leaderClubPayload['title'])->firstOrFail();
     expect($createdByLeader->type)->toBe(EventType::Club)
-        ->and($createdByLeader->status)->toBe(EventStatus::Pending)
+        ->and($createdByLeader->status)->toBe(EventStatus::Approved)
         ->and($createdByLeader->club_id)->toBe($club->id);
 
+    // A plain student with no leadership position in this club cannot create its events.
     $this->actingAs($nonLeader)
         ->post(route('events.store'), eventPayload([
             'title' => 'Non Leader Club Event ' . fake()->unique()->numerify('###'),
@@ -232,6 +237,7 @@ it('enforces role restrictions for school and club event creation', function () 
         ]))
         ->assertForbidden();
 
+    // An admin-created school event auto-approves (the admin is the approver).
     $adminSchoolPayload = eventPayload([
         'title' => 'Admin School Event ' . fake()->unique()->numerify('###'),
         'type' => EventType::School->value,
@@ -244,6 +250,6 @@ it('enforces role restrictions for school and club event creation', function () 
 
     $createdByAdmin = Event::where('title', $adminSchoolPayload['title'])->firstOrFail();
     expect($createdByAdmin->type)->toBe(EventType::School)
-        ->and($createdByAdmin->status)->toBe(EventStatus::Pending)
+        ->and($createdByAdmin->status)->toBe(EventStatus::Approved)
         ->and($createdByAdmin->club_id)->toBeNull();
 });

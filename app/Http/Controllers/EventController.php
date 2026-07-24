@@ -165,7 +165,7 @@ class EventController extends Controller
         } else {
             $clubs = Club::active()
                 ->whereHas('memberships', fn ($q) => $q->where('user_id', $user->id)
-                    ->whereIn('role', [MembershipRole::Leader, MembershipRole::CoLeader])
+                    ->whereIn('role', MembershipRole::leadershipRoles())
                     ->where('status', MembershipStatus::Active))
                 ->orderBy('name')
                 ->get(['id', 'name']);
@@ -173,7 +173,7 @@ class EventController extends Controller
 
         return Inertia::render('events/create', [
             'clubs' => $clubs,
-            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin'])
                 || $user->clubMemberships()->leaders()->active()->exists(),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,
@@ -212,7 +212,7 @@ class EventController extends Controller
         } else {
             $clubs = Club::active()
                 ->whereHas('memberships', fn ($q) => $q->where('user_id', $user->id)
-                    ->whereIn('role', [MembershipRole::Leader, MembershipRole::CoLeader])
+                    ->whereIn('role', MembershipRole::leadershipRoles())
                     ->where('status', MembershipStatus::Active))
                 ->orderBy('name')
                 ->get(['id', 'name']);
@@ -223,7 +223,7 @@ class EventController extends Controller
         return Inertia::render('events/edit', [
             'event' => $event,
             'clubs' => $clubs,
-            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin', 'club-leader'])
+            'canCreateSchoolEvents' => $user->hasRole(['admin', 'super-admin'])
                 || $user->clubMemberships()->leaders()->active()->exists(),
             'eventTypes' => collect(EventType::cases())->map(fn (EventType $t) => [
                 'value' => $t->value,

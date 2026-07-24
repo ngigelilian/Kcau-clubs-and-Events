@@ -29,7 +29,7 @@ class MerchandisePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->clubMemberships()->leaders()->active()->exists();
     }
 

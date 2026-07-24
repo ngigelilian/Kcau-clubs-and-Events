@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -30,7 +31,12 @@ export function NavMain({ items = [], label = 'Platform' }: { items: NavItem[]; 
                             >
                                 <Link href={item.href} prefetch>
                                     {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
+                                    <span className="flex-1">{item.title}</span>
+                                    {!!item.badge && (
+                                        <Badge variant="default" className="h-5 min-w-5 justify-center px-1 text-[10px]">
+                                            {item.badge}
+                                        </Badge>
+                                    )}
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

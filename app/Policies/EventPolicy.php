@@ -39,7 +39,7 @@ class EventPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->clubMemberships()->leaders()->active()->exists();
     }
 
@@ -49,7 +49,7 @@ class EventPolicy
      */
     public function createSchool(User $user): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->clubMemberships()->leaders()->active()->exists();
     }
 
@@ -58,7 +58,7 @@ class EventPolicy
      */
     public function createClub(User $user, Club $club): bool
     {
-        return $user->hasRole(['admin', 'super-admin', 'club-leader'])
+        return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
     }
 

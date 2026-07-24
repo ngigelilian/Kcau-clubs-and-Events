@@ -25,12 +25,12 @@ class ClubPolicy
 
     /**
      * Determine whether the user can create clubs.
-     * Any authenticated user can propose a new club.
+     * Any authenticated user can propose a new club — this is how club
+     * leadership begins; the proposer becomes Chairperson once approved.
      */
     public function create(User $user): bool
     {
-        // Only club leaders and admins may propose new clubs.
-        return $user->hasRole(['admin', 'super-admin', 'club-leader']);
+        return true;
     }
 
     /**
@@ -72,12 +72,25 @@ class ClubPolicy
     }
 
     /**
-     * Determine whether the user can manage club members.
+     * Determine whether the user can manage ordinary club members
+     * (approve/reject join requests, remove a plain Member). Any
+     * leadership position can do this — it's not a sensitive action.
      */
     public function manageMembers(User $user, Club $club): bool
     {
         return $user->hasRole(['admin', 'super-admin'])
             || $user->isLeaderOf($club);
+    }
+
+    /**
+     * Determine whether the user can manage club leadership itself —
+     * invite/remove a leader, transfer chairpersonship, disband the club.
+     * Chairperson-only (admins have their own separate succession path,
+     * see ClubLeadershipService::adminRemoveChairperson()).
+     */
+    public function manageLeadership(User $user, Club $club): bool
+    {
+        return $user->isChairpersonOf($club);
     }
 
     /**

@@ -23,6 +23,7 @@ class ClubMembership extends Model
         'membership_fee_due',
         'membership_fee_waived',
         'joined_at',
+        'leadership_since',
     ];
 
     /**
@@ -36,6 +37,7 @@ class ClubMembership extends Model
             'membership_fee_due' => 'integer',
             'membership_fee_waived' => 'boolean',
             'joined_at' => 'datetime',
+            'leadership_since' => 'datetime',
         ];
     }
 
@@ -80,10 +82,21 @@ class ClubMembership extends Model
     }
 
     /**
-     * Scope to only leaders (leaders and co-leaders).
+     * Scope to any active leadership position (Chairperson, Secretary,
+     * Treasurer, Co-Chair — anything other than a plain Member).
      */
     public function scopeLeaders($query)
     {
-        return $query->whereIn('role', [MembershipRole::Leader, MembershipRole::CoLeader]);
+        return $query->whereIn('role', MembershipRole::leadershipRoles());
+    }
+
+    /**
+     * Scope to only the Chairperson position — the sole holder of
+     * sensitive club privileges (invite/remove leaders, transfer
+     * chairpersonship, disband the club).
+     */
+    public function scopeChairperson($query)
+    {
+        return $query->where('role', MembershipRole::Chairperson);
     }
 }

@@ -14,10 +14,12 @@ use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ClubController;
+use App\Http\Controllers\ClubLeadershipController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventBookmarkController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\MerchandiseController;
 use App\Http\Controllers\PaymentController;
@@ -96,12 +98,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{club}/members/{membershipId}/approve', [ClubController::class, 'approveMember'])->name('members.approve');
         Route::post('/{club}/members/{membershipId}/reject', [ClubController::class, 'rejectMember'])->name('members.reject');
         Route::delete('/{club}/members/{membershipId}', [ClubController::class, 'removeMember'])->name('members.remove');
-        Route::post('/{club}/members/{membershipId}/promote', [ClubController::class, 'promoteMember'])->name('members.promote');
-        Route::post('/{club}/members/{membershipId}/demote', [ClubController::class, 'demoteMember'])->name('members.demote');
+
+        // Leadership management (Chairperson only — invite/remove leaders, transfer chairpersonship)
+        Route::get('/{club}/leaders', [ClubLeadershipController::class, 'index'])->name('leaders.index');
+        Route::get('/{club}/leaders/search-students', [ClubLeadershipController::class, 'searchStudents'])->name('leaders.search-students');
+        Route::post('/{club}/leaders/invite', [ClubLeadershipController::class, 'invite'])->name('leaders.invite');
+        Route::delete('/{club}/leaders/invitations/{invitation}', [ClubLeadershipController::class, 'revokeInvitation'])->name('leaders.invitations.revoke');
+        Route::delete('/{club}/leaders/{membershipId}', [ClubLeadershipController::class, 'removeLeader'])->name('leaders.remove');
+        Route::post('/{club}/leaders/{membershipId}/transfer-chair', [ClubLeadershipController::class, 'transferChairperson'])->name('leaders.transfer-chair');
+        Route::delete('/{club}/disband', [ClubLeadershipController::class, 'disband'])->name('disband');
 
         // Club Merchandise
         Route::get('/{club}/merchandise/create', [MerchandiseController::class, 'create'])->name('merchandise.create');
         Route::post('/{club}/merchandise', [MerchandiseController::class, 'store'])->name('merchandise.store');
+    });
+
+    // -----------------------------------------------------------------
+    // Leadership Invitation Routes (the invitee's side)
+    // -----------------------------------------------------------------
+    Route::prefix('invitations')->name('invitations.')->group(function () {
+        Route::get('/', [InvitationController::class, 'index'])->name('index');
+        Route::post('/{invitation}/accept', [InvitationController::class, 'accept'])->name('accept');
+        Route::post('/{invitation}/decline', [InvitationController::class, 'decline'])->name('decline');
     });
 
     // -----------------------------------------------------------------
@@ -170,6 +188,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/clubs/{club}/reject', [ClubApprovalController::class, 'reject'])->name('clubs.reject');
         Route::post('/clubs/{club}/suspend', [ClubApprovalController::class, 'suspend'])->name('clubs.suspend');
         Route::post('/clubs/{club}/reactivate', [ClubApprovalController::class, 'reactivate'])->name('clubs.reactivate');
+        Route::post('/clubs/{club}/remove-chairperson', [ClubApprovalController::class, 'removeChairperson'])->name('clubs.remove-chairperson');
 
         // Event Approval & Management
         Route::get('/events', [EventApprovalController::class, 'index'])->name('events.index');

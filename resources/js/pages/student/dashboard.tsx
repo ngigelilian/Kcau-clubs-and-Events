@@ -20,6 +20,14 @@ import type { User } from '@/types/auth';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
+const ROLE_LABELS: Record<string, string> = {
+    chairperson: 'Chairperson',
+    secretary: 'Secretary',
+    treasurer: 'Treasurer',
+    co_chair: 'Co-Chair',
+    member: 'Member',
+};
+
 function formatDate(d: string) {
     return new Date(d).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
 }
@@ -356,8 +364,8 @@ export default function StudentDashboard({
                                         </Avatar>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium truncate">{mem.club.name}</p>
-                                            <Badge className={`text-xs ${mem.role === 'leader' ? 'bg-[#d0b216]/20 text-amber-700' : mem.role === 'co-leader' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                                                {mem.role === 'co-leader' ? 'Co-Leader' : mem.role.charAt(0).toUpperCase() + mem.role.slice(1)}
+                                            <Badge className={`text-xs ${mem.role === 'chairperson' ? 'bg-[#d0b216]/20 text-amber-700' : mem.role !== 'member' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                                {ROLE_LABELS[mem.role] ?? mem.role}
                                             </Badge>
                                         </div>
                                         <Link href={`/clubs/${mem.club.slug}`}

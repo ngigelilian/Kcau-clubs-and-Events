@@ -108,7 +108,7 @@ class ClubController extends Controller
 
         // Leaders (for display)
         $leaders = $club->memberships
-            ->filter(fn ($m) => in_array($m->role->value, ['leader', 'co-leader']))
+            ->filter(fn ($m) => $m->role->isLeadership())
             ->values();
 
         return Inertia::render('clubs/show', [
@@ -210,9 +210,11 @@ class ClubController extends Controller
             return back()->with('error', 'You are not an active member of this club.');
         }
 
-        // Leaders cannot leave — they must transfer leadership first
-        if ($membership->role->value === 'leader') {
-            return back()->with('error', 'Club leaders cannot leave. Transfer leadership first.');
+        // Only the Chairperson is barred from leaving directly — they must
+        // transfer chairpersonship to another leader first (succession rule).
+        // Other leadership positions (Secretary/Treasurer/Co-Chair) can leave freely.
+        if ($membership->role->isChairperson()) {
+            return back()->with('error', 'As Chairperson, you must transfer leadership to another leader before leaving.');
         }
 
         $membership->delete();
@@ -229,7 +231,7 @@ class ClubController extends Controller
 
         $members = $club->memberships()
             ->with('user:id,name,email,avatar,student_id,department,year_of_study')
-            ->orderByRaw("CASE WHEN role = 'leader' THEN 0 WHEN role = 'co-leader' THEN 1 ELSE 2 END")
+            ->orderByRaw("CASE WHEN role = 'chairperson' THEN 0 WHEN role = 'co_chair' THEN 1 WHEN role = 'secretary' THEN 2 WHEN role = 'treasurer' THEN 3 ELSE 4 END")
             ->orderBy('joined_at')
             ->paginate(20);
 
@@ -243,6 +245,7 @@ class ClubController extends Controller
             'club' => $club,
             'members' => $members,
             'pendingRequests' => $pendingRequests,
+            'isChairperson' => auth()->user()->isChairpersonOf($club),
         ]);
     }
 
@@ -273,7 +276,9 @@ class ClubController extends Controller
     }
 
     /**
-     * Remove a member from the club.
+     * Remove a plain member from the club. Anyone holding a leadership
+     * position is out of scope here — removing a leader is a sensitive
+     * action handled by ClubLeadershipController::removeLeader() instead.
      */
     public function removeMember(Club $club, int $membershipId)
     {
@@ -281,39 +286,12 @@ class ClubController extends Controller
 
         $membership = $club->memberships()->findOrFail($membershipId);
 
-        // Cannot remove the primary leader
-        if ($membership->role === \App\Enums\MembershipRole::Leader) {
-            return back()->with('error', 'Cannot remove the primary club leader.');
+        if ($membership->role->isLeadership()) {
+            return back()->with('error', 'This member holds a leadership position. Use the leadership management page to remove them.');
         }
 
         $this->clubService->removeMember($club, $membership->user, auth()->user());
 
         return back()->with('success', 'Member removed.');
-    }
-
-    /**
-     * Promote a member to co-leader.
-     */
-    public function promoteMember(Club $club, int $membershipId)
-    {
-        $this->authorize('manageMembers', $club);
-
-        $membership = $club->memberships()->findOrFail($membershipId);
-        $this->clubService->promoteToColeader($membership, auth()->user());
-
-        return back()->with('success', 'Member promoted to co-leader.');
-    }
-
-    /**
-     * Demote a co-leader to member.
-     */
-    public function demoteMember(Club $club, int $membershipId)
-    {
-        $this->authorize('manageMembers', $club);
-
-        $membership = $club->memberships()->findOrFail($membershipId);
-        $this->clubService->demoteToMember($membership, auth()->user());
-
-        return back()->with('success', 'Co-leader demoted to member.');
     }
 }

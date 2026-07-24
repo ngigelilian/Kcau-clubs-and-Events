@@ -7,8 +7,8 @@ import type { User } from './auth';
 export type ClubStatus = 'pending' | 'active' | 'suspended';
 export type ClubCategory = 'academic' | 'cultural' | 'sports' | 'religious' | 'technology' | 'social' | 'other';
 export type ClubMembershipType = 'free' | 'subscription' | 'hybrid';
-export type MembershipRole = 'member' | 'leader' | 'co-leader';
-export type MembershipStatus = 'pending' | 'active' | 'rejected';
+export type MembershipRole = 'member' | 'chairperson' | 'secretary' | 'treasurer' | 'co_chair';
+export type MembershipStatus = 'pending' | 'active' | 'rejected' | 'removed';
 export type EventType = 'club' | 'school';
 export type EventStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'cancelled' | 'completed';
 export type RegistrationStatus = 'registered' | 'attended' | 'cancelled';
@@ -69,12 +69,33 @@ export interface ClubMembership {
     membership_fee_due: number;
     membership_fee_waived: boolean;
     joined_at: string | null;
+    leadership_since: string | null;
     created_at: string;
     updated_at: string;
 
     // Relationships
     club?: Club;
     user?: User;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'revoked' | 'expired';
+
+export interface ClubLeaderInvitation {
+    id: number;
+    club_id: number;
+    inviter_id: number;
+    invitee_id: number;
+    position: MembershipRole;
+    status: InvitationStatus;
+    responded_at: string | null;
+    expires_at: string | null;
+    created_at: string;
+    updated_at: string;
+
+    // Relationships
+    club?: Club;
+    inviter?: User;
+    invitee?: User;
 }
 
 export interface EventSession {

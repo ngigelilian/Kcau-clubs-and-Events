@@ -52,7 +52,7 @@ class AnnouncementController extends Controller
         } else {
             $clubs = Club::active()
                 ->whereHas('memberships', fn ($q) => $q->where('user_id', $user->id)
-                    ->whereIn('role', ['leader', 'co-leader'])
+                    ->whereIn('role', array_map(fn ($r) => $r->value, \App\Enums\MembershipRole::leadershipRoles()))
                     ->where('status', 'active'))
                 ->orderBy('name')
                 ->get(['id', 'name']);

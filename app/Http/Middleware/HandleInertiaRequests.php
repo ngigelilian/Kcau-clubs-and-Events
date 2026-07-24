@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Club;
+use App\Models\ClubLeaderInvitation;
 use App\Models\Event;
 use Illuminate\Support\Facades\URL;
 
@@ -49,6 +50,15 @@ class HandleInertiaRequests extends Middleware
 
         $roles = $user ? $user->getRoleNames()->toArray() : [];
         $permissions = $user ? $user->getAllPermissions()->pluck('name')->toArray() : [];
+        $isLeader = $user
+            ? $user->clubMemberships()->leaders()->active()->exists()
+            : false;
+        $isChairpersonOfAny = $user
+            ? $user->clubMemberships()->chairperson()->active()->exists()
+            : false;
+        $pendingInvitationsCount = $user
+            ? ClubLeaderInvitation::forInvitee($user->id)->pending()->count()
+            : 0;
 
         return [
             ...parent::share($request),
@@ -57,7 +67,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? array_merge($user->toArray(), [
                     'roles' => $roles,
                     'permissions' => $permissions,
-                    'is_leader' => in_array('club-leader', $roles, true),
+                    'is_leader' => $isLeader,
+                    'is_chairperson' => $isChairpersonOfAny,
                     'is_student' => in_array('student', $roles, true),
                 ]) : null,
             ],
@@ -65,6 +76,7 @@ class HandleInertiaRequests extends Middleware
                 'createClub' => $user ? $user->can('create', Club::class) : false,
                 'createEvent' => $user ? $user->can('create', Event::class) : false,
             ],
+            'pendingInvitationsCount' => $pendingInvitationsCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

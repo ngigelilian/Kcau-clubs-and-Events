@@ -116,7 +116,7 @@ class EventService
             // Admins and club leaders may both propose school-wide events.
             // A leader's school event still requires admin approval — see
             // resolveCreateStatus()/resolveUpdateStatus() below.
-            $isLeader = $actor->hasRole(['admin', 'super-admin', 'club-leader'])
+            $isLeader = $actor->hasRole(['admin', 'super-admin'])
                 || $actor->clubMemberships()->leaders()->active()->exists();
 
             if (! $isLeader) {

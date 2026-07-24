@@ -176,7 +176,21 @@ class User extends Authenticatable
         return $this->clubMemberships()
             ->where('club_id', $club->id)
             ->where('status', 'active')
-            ->whereIn('role', ['leader', 'co-leader'])
+            ->whereIn('role', array_map(fn ($r) => $r->value, \App\Enums\MembershipRole::leadershipRoles()))
+            ->exists();
+    }
+
+    /**
+     * Whether this user holds the Chairperson position for the given club —
+     * the only position with sensitive privileges (invite/remove leaders,
+     * transfer chairpersonship, disband the club).
+     */
+    public function isChairpersonOf(Club $club): bool
+    {
+        return $this->clubMemberships()
+            ->where('club_id', $club->id)
+            ->where('status', 'active')
+            ->where('role', \App\Enums\MembershipRole::Chairperson->value)
             ->exists();
     }
 

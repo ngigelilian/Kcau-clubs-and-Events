@@ -126,7 +126,7 @@ it('notifies active club members when a leader publishes a club announcement', f
 
     $club = Club::factory()->active()->create(['created_by' => $leader->id]);
 
-    ClubMembership::factory()->leader()->create([
+    ClubMembership::factory()->chairperson()->create([
         'club_id' => $club->id,
         'user_id' => $leader->id,
     ]);

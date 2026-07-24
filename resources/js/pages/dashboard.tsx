@@ -83,11 +83,14 @@ function AdminDashboard({ stats, recentUsers, pendingClubs, pendingEvents, recen
 
 function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders, recentPayments, announcements, openTickets }: StudentProps) {
     const { auth, can } = usePage().props as {
-        auth: { user: { roles?: string[]; is_leader?: boolean } | null };
+        auth: { user: { roles?: string[]; is_leader?: boolean; is_chairperson?: boolean } | null };
         can?: { createClub?: boolean; createEvent?: boolean };
     };
-    const leaderOf = (usePage().props as any).leaderOf as { id: number; name: string; slug: string }[] | undefined;
+    const leaderOf = (usePage().props as any).leaderOf as {
+        id: number; name: string; slug: string; position: string; position_label: string; is_chairperson: boolean;
+    }[] | undefined;
     const isLeader = !!auth.user?.is_leader || !!(leaderOf && leaderOf.length > 0);
+    const isChairpersonOfAny = !!auth.user?.is_chairperson || !!leaderOf?.some(l => l.is_chairperson);
 
     return (
         <div className="space-y-6">
@@ -97,12 +100,20 @@ function StudentDashboard({ myClubs, myUpcomingEvents, upcomingEvents, myOrders,
                         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
                         <Badge variant={isLeader ? 'default' : 'outline'} className="gap-1">
                             {isLeader && <Crown className="h-3 w-3" />}
-                            {isLeader ? 'Club Leader' : 'Student'}
+                            {isLeader ? (isChairpersonOfAny ? 'Chairperson' : 'Club Leader') : 'Student'}
                         </Badge>
                     </div>
                     <p className="text-muted-foreground">Welcome back! Here's what's happening.</p>
-                    {isLeader && (
-                        <p className="mt-2 text-sm text-muted-foreground">You lead {leaderOf!.map(l => l.name).join(', ')}.</p>
+                    {isLeader && leaderOf && leaderOf.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {leaderOf.map(l => (
+                                <Link key={l.id} href={l.is_chairperson ? `/clubs/${l.slug}/leaders` : `/clubs/${l.slug}`}>
+                                    <Badge variant="outline" className="text-xs hover:bg-muted">
+                                        {l.position_label} — {l.name}
+                                    </Badge>
+                                </Link>
+                            ))}
+                        </div>
                     )}
                 </div>
                 {(can?.createClub || can?.createEvent) && (

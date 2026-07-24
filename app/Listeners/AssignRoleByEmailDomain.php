@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class AssignRoleByEmailDomain
@@ -24,32 +23,14 @@ class AssignRoleByEmailDomain
             return;
         }
 
-        $domain = Str::lower(Str::after($user->email, '@'));
-
-        // Map leader-like domains to `club-leader` (tolerant to subdomains/typos containing 'leader')
-        if (Str::contains($domain, 'leader')) {
-            Role::firstOrCreate(['name' => 'club-leader']);
-            if (! $user->hasRole('club-leader')) {
-                $user->assignRole('club-leader');
-            }
-            if ($user->hasRole('student')) {
-                $user->removeRole('student');
-            }
-            return;
+        // Under the club-scoped leadership model, platform role is always
+        // 'student' for anyone who isn't an Admin/Super Admin — leadership
+        // positions (Chairperson/Secretary/Treasurer/Co-Chair) live entirely
+        // in club_memberships, never as a platform role. Email domain no
+        // longer grants any special platform role.
+        Role::firstOrCreate(['name' => 'student']);
+        if (! $user->hasRole('student')) {
+            $user->assignRole('student');
         }
-
-        // Map student-like domains to `student`
-        if (Str::contains($domain, 'student') || $domain === 'kcau.ac.ke') {
-            Role::firstOrCreate(['name' => 'student']);
-            if (! $user->hasRole('student')) {
-                $user->assignRole('student');
-            }
-            if ($user->hasRole('club-leader')) {
-                $user->removeRole('club-leader');
-            }
-            return;
-        }
-
-        // leave other domains unchanged
     }
 }

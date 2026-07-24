@@ -87,22 +87,6 @@ class RoleAndPermissionSeeder extends Seeder
             'purchase-merchandise',
         ]);
 
-        // Club Leader
-        $clubLeader = Role::firstOrCreate(['name' => 'club-leader']);
-        $clubLeader->syncPermissions([
-            'create-club-events',
-            'manage-club-members',
-            'manage-club-merchandise',
-            'send-club-announcements',
-            'manage-event-attendance',
-            'view-club-reports',
-            'create-tickets',
-            'browse-clubs',
-            'browse-events',
-            'register-events',
-            'purchase-merchandise',
-        ]);
-
         // Student
         $student = Role::firstOrCreate(['name' => 'student']);
         $student->syncPermissions([

@@ -17,6 +17,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('send:event-reminders')
             ->hourly()
             ->withoutOverlapping();
+
+        // Flip stale pending club leadership invitations to Expired
+        $schedule->command('clubs:expire-leader-invitations')
+            ->hourly()
+            ->withoutOverlapping();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\ClubStatus;
 use App\Enums\MembershipStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Club;
+use App\Services\ClubLeadershipService;
 use App\Services\ClubService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +16,7 @@ class ClubApprovalController extends Controller
 {
     public function __construct(
         private readonly ClubService $clubService,
+        private readonly ClubLeadershipService $leadershipService,
     ) {}
 
     /**
@@ -152,5 +154,23 @@ class ClubApprovalController extends Controller
         $this->clubService->reactivateClub($club, auth()->user());
 
         return back()->with('success', "Club '{$club->name}' has been reactivated.");
+    }
+
+    /**
+     * Remove the club's Chairperson for misconduct/inactivity. The most
+     * senior remaining leader is automatically promoted — admins never
+     * directly appoint a successor themselves.
+     */
+    public function removeChairperson(Club $club)
+    {
+        $this->authorize('approve', $club);
+
+        try {
+            $newChair = $this->leadershipService->adminRemoveChairperson($club, auth()->user());
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Chairperson removed. {$newChair->user->name} has been automatically promoted to Chairperson.");
     }
 }

@@ -118,8 +118,21 @@ class DashboardController extends Controller
                 'openTickets' => $openTicketsCount,
             ],
             'myClubs' => $myClubs,
-            // Clubs where the user is a leader (for dashboard mention)
-            'leaderOf' => Club::whereHas('memberships', fn ($q) => $q->where('user_id', $user->id)->where('role', 'leader')->where('status', MembershipStatus::Active))->get(['id','name','slug']),
+            // Clubs where the user holds any leadership position, with their position per club
+            'leaderOf' => $user->clubMemberships()
+                ->leaders()
+                ->active()
+                ->with('club:id,name,slug')
+                ->get()
+                ->map(fn ($m) => [
+                    'id' => $m->club->id,
+                    'name' => $m->club->name,
+                    'slug' => $m->club->slug,
+                    'position' => $m->role->value,
+                    'position_label' => $m->role->label(),
+                    'is_chairperson' => $m->role->isChairperson(),
+                ])
+                ->values(),
             'myUpcomingEvents' => $myUpcomingEvents,
             'upcomingEvents' => $upcomingEvents,
             'myOrders' => $myOrders,

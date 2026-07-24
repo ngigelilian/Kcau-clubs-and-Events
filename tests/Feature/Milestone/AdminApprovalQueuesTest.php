@@ -17,7 +17,6 @@ use Spatie\Permission\Models\Role;
 beforeEach(function () {
     Role::findOrCreate('super-admin', 'web');
     Role::findOrCreate('admin', 'web');
-    Role::findOrCreate('club-leader', 'web');
     Role::findOrCreate('student', 'web');
 });
 
@@ -28,7 +27,7 @@ it('validates admin club queue transitions approve reject suspend reactivate', f
     $proposer = User::factory()->create();
 
     $pendingClub = Club::factory()->pending()->create(['created_by' => $proposer->id]);
-    ClubMembership::factory()->leader()->pending()->create([
+    ClubMembership::factory()->chairperson()->pending()->create([
         'club_id' => $pendingClub->id,
         'user_id' => $proposer->id,
     ]);
@@ -56,7 +55,7 @@ it('validates admin club queue transitions approve reject suspend reactivate', f
     expect($suspendTarget->fresh()->status)->toBe(ClubStatus::Active);
 
     $rejectTarget = Club::factory()->pending()->create(['created_by' => $proposer->id]);
-    ClubMembership::factory()->leader()->pending()->create([
+    ClubMembership::factory()->chairperson()->pending()->create([
         'club_id' => $rejectTarget->id,
         'user_id' => $proposer->id,
     ]);

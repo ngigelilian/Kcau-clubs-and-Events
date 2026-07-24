@@ -1,5 +1,5 @@
-import { Head, router } from '@inertiajs/react';
-import { Check, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Check, ShieldCheck, Trash2, X } from 'lucide-react';
 import DataPagination from '@/components/shared/data-pagination';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -21,11 +21,14 @@ interface Props {
     club: Club;
     members: PaginatedResponse<ClubMembership>;
     pendingRequests: ClubMembership[];
+    isChairperson: boolean;
 }
 
 const roleBadge: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
-    leader: { label: 'Leader', variant: 'default' },
-    'co-leader': { label: 'Co-Leader', variant: 'secondary' },
+    chairperson: { label: 'Chairperson', variant: 'default' },
+    secretary: { label: 'Secretary', variant: 'secondary' },
+    treasurer: { label: 'Treasurer', variant: 'secondary' },
+    co_chair: { label: 'Co-Chair', variant: 'secondary' },
     member: { label: 'Member', variant: 'outline' },
 };
 
@@ -35,7 +38,7 @@ const statusBadge: Record<string, { label: string; variant: 'default' | 'seconda
     rejected: { label: 'Rejected', variant: 'destructive' },
 };
 
-export default function ClubMembers({ club, members: membersData, pendingRequests }: Props) {
+export default function ClubMembers({ club, members: membersData, pendingRequests, isChairperson }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Clubs', href: index.url() },
         { title: club.name, href: show.url(club.slug) },
@@ -58,22 +61,24 @@ export default function ClubMembers({ club, members: membersData, pendingRequest
         }
     };
 
-    const handlePromote = (membershipId: number) => {
-        router.post(`${baseUrl}/${membershipId}/promote`);
-    };
-
-    const handleDemote = (membershipId: number) => {
-        router.post(`${baseUrl}/${membershipId}/demote`);
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`${club.name} — Members`} />
 
             <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{club.name} — Members</h1>
-                    <p className="text-muted-foreground">Manage club membership and join requests.</p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">{club.name} — Members</h1>
+                        <p className="text-muted-foreground">Manage club membership and join requests.</p>
+                    </div>
+                    {isChairperson && (
+                        <Link href={`/clubs/${club.slug}/leaders`}>
+                            <Button variant="outline" size="sm">
+                                <ShieldCheck className="mr-1.5 h-4 w-4" />
+                                Manage Leadership Team
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Pending Requests */}
@@ -128,6 +133,11 @@ export default function ClubMembers({ club, members: membersData, pendingRequest
                                 ({membersData.total} total)
                             </span>
                         </CardTitle>
+                        <CardDescription>
+                            Leadership positions (Chairperson, Secretary, Treasurer, Co-Chair) are managed from the
+                            {isChairperson ? ' Leadership Team page above' : ' Leadership Team page'} — only plain
+                            members can be removed here.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -145,7 +155,7 @@ export default function ClubMembers({ club, members: membersData, pendingRequest
                                 {membersData.data.map((m) => {
                                     const role = roleBadge[m.role] ?? roleBadge.member;
                                     const status = statusBadge[m.status] ?? statusBadge.pending;
-                                    const isLeader = m.role === 'leader';
+                                    const isPlainMember = m.role === 'member';
 
                                     return (
                                         <TableRow key={m.id}>
@@ -178,30 +188,8 @@ export default function ClubMembers({ club, members: membersData, pendingRequest
                                                     : '—'}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                {!isLeader && m.status === 'active' && (
+                                                {isPlainMember && m.status === 'active' && (
                                                     <div className="flex justify-end gap-1">
-                                                        {m.role === 'member' && (
-                                                            <Button
-                                                                size="icon"
-                                                                variant="ghost"
-                                                                className="h-8 w-8"
-                                                                title="Promote to co-leader"
-                                                                onClick={() => handlePromote(m.id)}
-                                                            >
-                                                                <ChevronUp className="h-4 w-4" />
-                                                            </Button>
-                                                        )}
-                                                        {m.role === 'co-leader' && (
-                                                            <Button
-                                                                size="icon"
-                                                                variant="ghost"
-                                                                className="h-8 w-8"
-                                                                title="Demote to member"
-                                                                onClick={() => handleDemote(m.id)}
-                                                            >
-                                                                <ChevronDown className="h-4 w-4" />
-                                                            </Button>
-                                                        )}
                                                         <Button
                                                             size="icon"
                                                             variant="ghost"

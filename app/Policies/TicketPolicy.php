@@ -28,11 +28,11 @@ class TicketPolicy
 
     /**
      * Determine whether the user can create tickets.
-     * Students and Club Leaders can create support tickets.
+     * Any authenticated user (Student, Admin, Super Admin) can create a support ticket.
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['student', 'club-leader', 'admin', 'super-admin']);
+        return $user->hasRole(['student', 'admin', 'super-admin']);
     }
 
     /**

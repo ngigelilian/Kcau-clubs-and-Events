@@ -60,6 +60,8 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
         leaders.some((l) => l.user_id === user.id)
     );
 
+    const isChairperson = user && leaders.some((l) => l.user_id === user.id && l.role === 'chairperson');
+
     const handleJoin = () => router.post(join.url(club.slug));
     const handleLeave = () => {
         if (confirm('Are you sure you want to leave this club?')) {
@@ -135,6 +137,14 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                 </Button>
                             </Link>
                         )}
+                        {isChairperson && (
+                            <Link href={`/clubs/${club.slug}/leaders`}>
+                                <Button variant="outline" size="sm">
+                                    <ShieldCheck className="mr-2 h-4 w-4" />
+                                    Leadership Team
+                                </Button>
+                            </Link>
+                        )}
                         {user && !userMembership && club.status === 'active' && (
                             <div className="space-y-2">
                                 <Button onClick={handleJoin}>
@@ -156,7 +166,7 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                 Pending Approval
                             </Button>
                         )}
-                        {userMembership?.status === 'active' && userMembership?.role !== 'leader' && (
+                        {userMembership?.status === 'active' && userMembership?.role !== 'chairperson' && (
                             <Button variant="outline" size="sm" onClick={handleLeave}>
                                 <LogOut className="mr-2 h-4 w-4" />
                                 Leave
@@ -284,11 +294,11 @@ export default function ClubShow({ club, leaders, userMembership }: Props) {
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate text-sm font-medium">{m.user?.name}</p>
                                             <p className="text-xs text-muted-foreground">
-                                                {m.role === 'leader' ? 'Leader' : 'Co-Leader'}
+                                                {{ chairperson: 'Chairperson', secretary: 'Secretary', treasurer: 'Treasurer', co_chair: 'Co-Chair' }[m.role] ?? m.role}
                                             </p>
                                         </div>
                                         {/* ✅ Was: text-[#d0b216] — now uses accent token */}
-                                        {m.role === 'leader' ? (
+                                        {m.role === 'chairperson' ? (
                                             <ShieldCheck className="h-4 w-4 text-accent" />
                                         ) : null}
                                     </div>

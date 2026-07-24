@@ -7,6 +7,7 @@ enum MembershipStatus: string
     case Pending = 'pending';
     case Active = 'active';
     case Rejected = 'rejected';
+    case Removed = 'removed';
 
     /**
      * Get a human-readable label for the status.
@@ -17,6 +18,7 @@ enum MembershipStatus: string
             self::Pending => 'Pending',
             self::Active => 'Active',
             self::Rejected => 'Rejected',
+            self::Removed => 'Removed',
         };
     }
 }

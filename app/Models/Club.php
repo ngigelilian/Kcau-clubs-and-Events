@@ -120,6 +120,14 @@ class Club extends Model implements HasMedia
     }
 
     /**
+     * Leadership invitations sent for this club.
+     */
+    public function leaderInvitations(): HasMany
+    {
+        return $this->hasMany(ClubLeaderInvitation::class);
+    }
+
+    /**
      * Events belonging to this club.
      */
     public function events(): HasMany

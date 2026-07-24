@@ -71,32 +71,27 @@ class DemoDataSeeder extends Seeder
                 'max_members' => rand(0, 1) ? rand(50, 200) : null,
             ]);
 
-            // Creator is leader
+            // Creator is Chairperson
             ClubMembership::create([
                 'club_id' => $club->id,
                 'user_id' => $creator->id,
-                'role' => MembershipRole::Leader,
+                'role' => MembershipRole::Chairperson,
                 'status' => MembershipStatus::Active,
                 'joined_at' => $club->approved_at,
+                'leadership_since' => $club->approved_at,
             ]);
 
-            // A co-leader
+            // A co-chair
             $coLeader = $students[$i + 8] ?? $students->random();
             if ($coLeader->id !== $creator->id) {
                 ClubMembership::create([
                     'club_id' => $club->id,
                     'user_id' => $coLeader->id,
-                    'role' => MembershipRole::CoLeader,
+                    'role' => MembershipRole::CoChair,
                     'status' => MembershipStatus::Active,
                     'joined_at' => $club->approved_at->addDays(rand(1, 7)),
+                    'leadership_since' => $club->approved_at->addDays(rand(1, 7)),
                 ]);
-                if (! $coLeader->hasRole('club-leader')) {
-                    $coLeader->assignRole('club-leader');
-                }
-            }
-
-            if (! $creator->hasRole('club-leader')) {
-                $creator->assignRole('club-leader');
             }
 
             $clubs->push($club);
@@ -151,7 +146,7 @@ class DemoDataSeeder extends Seeder
         ClubMembership::create([
             'club_id' => $pendingClub->id,
             'user_id' => $pendingClub->created_by,
-            'role' => MembershipRole::Leader,
+            'role' => MembershipRole::Chairperson,
             'status' => MembershipStatus::Pending,
         ]);
         $this->command->info('✓ Created 1 pending club');
@@ -187,7 +182,7 @@ class DemoDataSeeder extends Seeder
                 'is_paid' => $ed['paid'],
                 'fee_amount' => $ed['fee'],
                 'status' => EventStatus::Approved,
-                'created_by' => $club ? ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Leader)->first()?->user_id ?? $students->first()->id : $approver?->id ?? $students->first()->id,
+                'created_by' => $club ? ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Chairperson)->first()?->user_id ?? $students->first()->id : $approver?->id ?? $students->first()->id,
                 'approved_by' => $approver?->id,
                 'approved_at' => now()->subDays(rand(1, 14)),
             ]);
@@ -212,7 +207,7 @@ class DemoDataSeeder extends Seeder
                 'is_paid' => false,
                 'fee_amount' => 0,
                 'status' => EventStatus::Completed,
-                'created_by' => ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Leader)->first()?->user_id ?? $students->first()->id,
+                'created_by' => ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Chairperson)->first()?->user_id ?? $students->first()->id,
                 'approved_by' => $approver?->id,
                 'approved_at' => $pastStart->copy()->subDays(7),
             ]);
@@ -353,7 +348,7 @@ class DemoDataSeeder extends Seeder
 
         // Club announcements
         foreach ($clubs->take(4) as $club) {
-            $leader = ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Leader)->first();
+            $leader = ClubMembership::where('club_id', $club->id)->where('role', MembershipRole::Chairperson)->first();
             Announcement::create([
                 'club_id' => $club->id,
                 'user_id' => $leader?->user_id ?? $students->first()->id,

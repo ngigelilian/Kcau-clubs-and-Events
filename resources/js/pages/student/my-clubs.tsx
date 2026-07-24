@@ -47,13 +47,17 @@ interface Props {
 
 function RoleBadge({ role }: { role: string }) {
     const map: Record<string, string> = {
-        leader: 'bg-[#d0b216]/20 text-amber-700 border-amber-300',
-        'co-leader': 'bg-blue-100 text-blue-700 border-blue-200',
+        chairperson: 'bg-[#d0b216]/20 text-amber-700 border-amber-300',
+        secretary: 'bg-blue-100 text-blue-700 border-blue-200',
+        treasurer: 'bg-purple-100 text-purple-700 border-purple-200',
+        co_chair: 'bg-blue-100 text-blue-700 border-blue-200',
         member: 'bg-green-100 text-green-700 border-green-200',
     };
     const label: Record<string, string> = {
-        leader: '👑 Leader',
-        'co-leader': '🔵 Co-Leader',
+        chairperson: '👑 Chairperson',
+        secretary: '📋 Secretary',
+        treasurer: '💰 Treasurer',
+        co_chair: '🔵 Co-Chair',
         member: '✅ Member',
     };
     return (

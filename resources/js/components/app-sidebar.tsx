@@ -1,7 +1,7 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutGrid, Users, CalendarDays, ShoppingBag, Bell, LifeBuoy,
-    Bookmark, Trophy,
+    Bookmark, Trophy, Mail,
 } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -18,11 +18,12 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
     { title: 'My Hub', href: { url: '/student/dashboard', method: 'get' }, icon: LayoutGrid },
     { title: 'Events', href: { url: '/events', method: 'get' }, icon: CalendarDays },
     { title: 'Clubs', href: { url: '/clubs', method: 'get' }, icon: Users },
     { title: 'My Events', href: { url: '/student/my-events', method: 'get' }, icon: CalendarDays },
+    { title: 'My Invitations', href: { url: '/invitations', method: 'get' }, icon: Mail },
     { title: 'Bookmarks', href: { url: '/student/bookmarks', method: 'get' }, icon: Bookmark },
     { title: 'Leaderboard', href: { url: '/leaderboard', method: 'get' }, icon: Trophy },
     { title: 'Merchandise', href: { url: '/merchandise', method: 'get' }, icon: ShoppingBag },
@@ -31,6 +32,12 @@ const mainNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { pendingInvitationsCount } = usePage().props as { pendingInvitationsCount?: number };
+
+    const mainNavItems = baseNavItems.map((item) =>
+        item.title === 'My Invitations' ? { ...item, badge: pendingInvitationsCount || undefined } : item
+    );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

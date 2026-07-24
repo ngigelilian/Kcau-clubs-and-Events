@@ -55,10 +55,10 @@ class ClubService
                 $club->addMedia($data['banner'])->toMediaCollection('banner');
             }
 
-            // Creator becomes the leader (pending until club is approved)
+            // Creator becomes the Chairperson (pending until club is approved)
             $club->memberships()->create([
                 'user_id' => $creator->id,
-                'role' => MembershipRole::Leader,
+                'role' => MembershipRole::Chairperson,
                 'status' => MembershipStatus::Pending,
             ]);
 
@@ -127,20 +127,15 @@ class ClubService
                 'approved_at' => now(),
             ]);
 
-            // Activate the founder's membership
+            // Activate the founder's Chairperson membership
             $club->memberships()
-                ->where('role', MembershipRole::Leader)
+                ->where('role', MembershipRole::Chairperson)
                 ->where('status', MembershipStatus::Pending)
                 ->update([
                     'status' => MembershipStatus::Active,
                     'joined_at' => now(),
+                    'leadership_since' => now(),
                 ]);
-
-            // Assign club-leader role to the creator if not already assigned
-            $creator = $club->creator;
-            if ($creator && ! $creator->hasRole('club-leader')) {
-                $creator->assignRole('club-leader');
-            }
 
             activity()
                 ->performedOn($club)
@@ -300,53 +295,4 @@ class ClubService
             ->log('Member removed');
     }
 
-    /**
-     * Promote a member to co-leader.
-     */
-    public function promoteToColeader(ClubMembership $membership, User $promotedBy): ClubMembership
-    {
-        $membership->update(['role' => MembershipRole::CoLeader]);
-
-        // Ensure the user has the club-leader role
-        $user = $membership->user;
-        if (! $user->hasRole('club-leader')) {
-            $user->assignRole('club-leader');
-        }
-
-        activity()
-            ->performedOn($membership->club)
-            ->causedBy($promotedBy)
-            ->withProperties(['promoted_user_id' => $membership->user_id])
-            ->log('Member promoted to co-leader');
-
-        return $membership->fresh();
-    }
-
-    /**
-     * Demote a co-leader back to member.
-     */
-    public function demoteToMember(ClubMembership $membership, User $demotedBy): ClubMembership
-    {
-        $membership->update(['role' => MembershipRole::Member]);
-
-        // Check if user is still a leader in any other club
-        $user = $membership->user;
-        $isLeaderElsewhere = ClubMembership::where('user_id', $user->id)
-            ->where('id', '!=', $membership->id)
-            ->whereIn('role', [MembershipRole::Leader, MembershipRole::CoLeader])
-            ->where('status', MembershipStatus::Active)
-            ->exists();
-
-        if (! $isLeaderElsewhere && $user->hasRole('club-leader')) {
-            $user->removeRole('club-leader');
-        }
-
-        activity()
-            ->performedOn($membership->club)
-            ->causedBy($demotedBy)
-            ->withProperties(['demoted_user_id' => $membership->user_id])
-            ->log('Member demoted from co-leader');
-
-        return $membership->fresh();
-    }
 }

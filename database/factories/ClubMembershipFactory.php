@@ -34,17 +34,19 @@ class ClubMembershipFactory extends Factory
         ]);
     }
 
-    public function leader(): static
+    public function chairperson(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => MembershipRole::Leader,
+            'role' => MembershipRole::Chairperson,
+            'leadership_since' => now()->subDays(fake()->numberBetween(30, 365)),
         ]);
     }
 
-    public function coLeader(): static
+    public function coChair(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => MembershipRole::CoLeader,
+            'role' => MembershipRole::CoChair,
+            'leadership_since' => now()->subDays(fake()->numberBetween(1, 200)),
         ]);
     }
 
